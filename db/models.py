@@ -21,43 +21,21 @@ class User(Base):
     verified = Column(Boolean, default=False)
     balance = Column(Float, default=0)
 
-
-# class Tag(Base):
-#     __tablename__ = 'tags'
-    
-#     id = Column(Integer, primary_key=True)
-    
-
-# class PaymentSystem(Base):
-#     __tablename__ = 'payment_systems'
-    
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String(30))
-#     icon = Column(String(70))
-    
-
-# class Deposit(Base):
-#     __tablename__ = 'deposits'
-    
-#     id = Column(Integer, primary_key=True)
-#     amount = Column(Float)
-#     user_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
-    
-
-# class Withdraw(Base):
-#     __tablename__ = 'withdraws'
-    
-#     id = Column(Integer, primary_key=True)
-#     amount = Column(Float)
-#     user_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
-#     payment_system_id = Column(Integer, ForeignKey(f'{PaymentSystem.__tablename__}.id'))
-    
     
 class Category(Base):
     __tablename__ = 'categories'
     
     id = Column(Integer, primary_key=True)
     name = Column(String(30))
+    icon = Column(String(70))
+
+
+class FreelancersCategory(Base):
+    __tablename__ = 'categories_of_freelancers'
+    
+    id = Column(Integer, primary_key=True)
+    freelancer_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
+    category_id = Column(Integer, ForeignKey(f'{Category.__tablename__}.id'))
 
 
 class Task(Base):
