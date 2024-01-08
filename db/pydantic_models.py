@@ -78,6 +78,14 @@ class ProfileOut(BaseModel):
     user_reviews: List[UserReview]
     
     
+# review
+
+class ReviewToCreate(BaseModel):
+    to_id: int
+    rating: int
+    content: str
+    
+    
 
 
     

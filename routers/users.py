@@ -9,6 +9,7 @@ from sqlalchemy.orm import aliased
 
 from security import hash_password, encode_jwt, decode_jwt, check_password
 from db import depends_db, UserRegister, UserOut, User, FreelancersCategory, Review, FreelancersOut, FreelancerInfo, Category, ProfileOut, UserCategory, UserReview
+from helpers import get_user_by_token
 
 
 users_router = APIRouter(tags=['User'])
@@ -54,12 +55,7 @@ def user_auth(username: str, password: str, session = Depends(depends_db)):
 
 @users_router.get("/users/me", response_model=UserOut)
 def user_info(token: str = Depends(oauth2_scheme), session = Depends(depends_db)):
-    payload = decode_jwt(token)
-    if not payload:
-        raise HTTPException(status_code=401, detail="Для выполнения этого запроса вам нужно авторизоваться")
-    user_id = payload['id']
-    user = session.query(User).filter(User.id == user_id).first()
-    return user
+    return get_user_by_token(token, session)
 
 
 @users_router.get("/users/freelancers/get", response_model = FreelancersOut)
