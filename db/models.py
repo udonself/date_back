@@ -76,10 +76,10 @@ class Message(Base):
     __tablename__ = 'messages'
     
     id = Column(Integer, primary_key=True)
-    task_id = Column(Integer, ForeignKey(f'{Task.__tablename__}.id'))
     to_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
     from_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
-    content = Column(String(150))
+    content = Column(String(300))
+    created = Column(DateTime, default=datetime.now)
     
      
 

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -84,7 +84,24 @@ class ReviewToCreate(BaseModel):
     to_id: int
     rating: int
     content: str
+
+
+# messages
+
+class MessageToSend(BaseModel):
+    to_id: int
+    content: str
     
+
+class MessageOut(BaseModel):
+    from_id: int
+    content: str
+    hour: int
+    minute: int
+
+
+class ConversationOut(BaseModel):
+    messages_grouped_by_date: Dict[str, List[MessageOut]]
     
 
 

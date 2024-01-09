@@ -1,7 +1,5 @@
-from typing import List
-from math import ceil
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordBearer
 
 from db import depends_db, ReviewToCreate, Review
@@ -9,8 +7,6 @@ from helpers import get_user_by_token
 
 
 reviews_router = APIRouter(tags=['Reviews'])
-
-users_router = APIRouter(tags=['User'])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/reviews/create')
 
     

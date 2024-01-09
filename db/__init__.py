@@ -1,5 +1,6 @@
 from .models import User, Category, Task, ResponseToTask, Review, Message, FreelancersCategory
-from .pydantic_models import UserRegister, UserOut, TaskInfo, TasksOut, FreelancersOut, FreelancerInfo, UserRegister, ProfileOut, UserCategory, UserReview, ReviewToCreate
+from .pydantic_models import UserRegister, UserOut, TaskInfo, TasksOut, FreelancersOut, FreelancerInfo,\
+    UserRegister, ProfileOut, UserCategory, UserReview, ReviewToCreate, MessageToSend, ConversationOut, MessageOut
 from .database import get_db, depends_db
 
 __all__ = (
@@ -22,5 +23,8 @@ __all__ = (
     'ProfileOut',
     'UserReview',
     'UserCategory',
-    'ReviewToCreate'
+    'ReviewToCreate',
+    'MessageToSend',
+    'ConversationOut',
+    'MessageOut'
 )
