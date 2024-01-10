@@ -1,9 +1,10 @@
+from typing import List
 
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy import func, or_, and_, String
+from sqlalchemy import func, or_, and_, String, text
 
-from db import depends_db, User, Message, MessageToSend, ConversationOut, MessageOut
+from db import depends_db, User, Message, MessageToSend, ConversationOut, MessageOut, ConversationInfo
 from helpers import get_user_by_token
 
 
@@ -61,3 +62,41 @@ def get_messages(companion_id: int , token: str = Depends(oauth2_scheme), sessio
     )
 
     return conversation
+
+
+
+@messages_router.get('/messages/conversations', response_model=List[ConversationInfo])
+def get_conversations(token: str = Depends(oauth2_scheme), session = Depends(depends_db)):
+    user = get_user_by_token(token, session)
+    user_id = user.id
+    
+    result = session.execute(text(f"""SELECT
+    u.id AS interlocutor_id,
+    u.username AS interlocutor_username,
+    u.avatar AS interlocutor_avatar,
+    m.content AS last_message_content,
+    TO_CHAR(m.created, 'HH24:MI') AS last_message_created
+FROM
+    users u
+JOIN
+    messages m ON (u.id = m.from_id OR u.id = m.to_id)
+WHERE
+    (m.from_id = {user_id} OR m.to_id = {user_id})
+    AND m.created = (
+        SELECT MAX(created)
+        FROM messages
+        WHERE (from_id = u.id AND to_id = {user_id}) OR (from_id = {user_id} AND to_id = u.id)
+    );"""))
+    print(result)
+    
+    return [
+        ConversationInfo(
+            companion_id=c_id,
+            companion_username=c_name,
+            companion_avatar=c_ava,
+            last_message=c_msg,
+            last_date=c_date
+        ) for c_id, c_name, c_ava, c_msg, c_date in result
+    ]
+    
+    

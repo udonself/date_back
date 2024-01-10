@@ -43,22 +43,10 @@ class Task(Base):
     
     id = Column(Integer, primary_key=True)
     customer_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
-    freelancer_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'), nullable=True)
     category_id = Column(Integer, ForeignKey(f'{Category.__tablename__}.id'))
     title = Column(String(50))
     description = Column(String(500))
     created = Column(DateTime, default=datetime.now)
-    status = Column(Enum('open', 'in progress', 'completed', 'canceled', name='status_enum'))
-
-
-class ResponseToTask(Base):
-    __tablename__ = 'responses_to_tasks'
-    
-    id = Column(Integer, primary_key=True)
-    task_id = Column(Integer, ForeignKey(f'{Task.__tablename__}.id'))
-    freelancer_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
-    message = Column(String(500))
-    cost = Column(Float)
     
 
 class Review(Base):

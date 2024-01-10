@@ -28,13 +28,18 @@ class TaskInfo(BaseModel):
     id: int
     category: str
     title: str
-    responses: int
     created: datetime
 
 
 class TasksOut(BaseModel):
     tasks: List[TaskInfo]
     total_pages: int
+
+
+class TaskToCreate(BaseModel):
+    title: str
+    description: str
+    category_id: int
 
 
 class FreelancerInfo(BaseModel):
@@ -102,6 +107,16 @@ class MessageOut(BaseModel):
 
 class ConversationOut(BaseModel):
     messages_grouped_by_date: Dict[str, List[MessageOut]]
+
+    
+# conversations all
+
+class ConversationInfo(BaseModel):
+    companion_id: int
+    companion_username: str
+    companion_avatar: str
+    last_message: str
+    last_date: str
     
 
 
