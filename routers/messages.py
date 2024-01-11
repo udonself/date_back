@@ -86,7 +86,8 @@ WHERE
         SELECT MAX(created)
         FROM messages
         WHERE (from_id = u.id AND to_id = {user_id}) OR (from_id = {user_id} AND to_id = u.id)
-    );"""))
+    )
+    ORDER BY m.created DESC;"""))
     print(result)
     
     return [

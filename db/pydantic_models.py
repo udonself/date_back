@@ -16,6 +16,7 @@ class UserRegister(BaseModel):
     
     
 class UserOut(BaseModel):
+    id: int
     username: str
     role: str
     about: str | None
@@ -34,6 +35,17 @@ class TaskInfo(BaseModel):
 class TasksOut(BaseModel):
     tasks: List[TaskInfo]
     total_pages: int
+
+
+class TaskOut(BaseModel):
+    title: str
+    description: str
+    created: str
+    customer_id: int
+    customer_username: str
+    customer_avatar: str
+    caregory_name: str
+    
 
 
 class TaskToCreate(BaseModel):
@@ -81,6 +93,14 @@ class ProfileOut(BaseModel):
     avg_rating: float | None
     user_categories: List[UserCategory]
     user_reviews: List[UserReview]
+
+
+class UsernameToChange(BaseModel):
+    new_username: str
+
+
+class AvatarToChange(BaseModel):
+    base64avatar: str
     
     
 # review

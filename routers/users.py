@@ -1,14 +1,17 @@
 from typing import List
 from math import ceil
+import base64
 
 from fastapi import APIRouter, HTTPException
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import func, JSON, literal
 from sqlalchemy.orm import aliased
+import requests
 
 from security import hash_password, encode_jwt, decode_jwt, check_password
-from db import depends_db, UserRegister, UserOut, User, FreelancersCategory, Review, FreelancersOut, FreelancerInfo, Category, ProfileOut, UserCategory, UserReview
+from db import depends_db, UserRegister, UserOut, User, FreelancersCategory, Review,\
+    FreelancersOut, FreelancerInfo, Category, ProfileOut, UserCategory, UserReview, UsernameToChange, AvatarToChange
 from helpers import get_user_by_token
 
 
@@ -40,6 +43,27 @@ def user_register(user: UserRegister, session = Depends(depends_db)):
     session.commit()
     token = encode_jwt({'id': new_user.id})
     return {'token': token}
+
+
+@users_router.post("/users/changeUsername")
+def change_username(data: UsernameToChange, token: str = Depends(oauth2_scheme), session = Depends(depends_db)):
+    user = get_user_by_token(token, session)
+    user.username = data.new_username
+    session.commit()
+    return {'message': 'success'}
+
+
+@users_router.post("/users/changeAvatar")
+def change_avatar(data: AvatarToChange, token: str = Depends(oauth2_scheme), session = Depends(depends_db)):
+    user = get_user_by_token(token, session)
+    
+    base64avatar = data.base64avatar
+    response = requests.post('https://telegra.ph/upload', files = {"file": ('image.jpg', base64.b64decode(base64avatar), 'image/jpeg')})
+    telegraph_url = 'https://telegra.ph' + response.json()[0]['src']
+    
+    user.avatar = telegraph_url
+    session.commit()
+    return {'message': 'success'}
 
 
 @users_router.get("/users/auth")

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 from math import ceil
 
@@ -5,9 +6,10 @@ from fastapi import APIRouter, HTTPException
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import func
+from sqlalchemy.orm import aliased
 
 from security import hash_password, encode_jwt, decode_jwt, check_password
-from db import depends_db, Task, TaskInfo, TasksOut, Category, TaskToCreate
+from db import depends_db, Task, TaskInfo, TasksOut, Category, TaskToCreate, User, TaskOut
 from helpers import get_user_by_token
 
 
@@ -47,6 +49,44 @@ def create_task(task_data: TaskToCreate, token: str = Depends(oauth2_scheme), se
     session.add(new_task)
     session.commit()
     return new_task
+
+
+@tasks_router.get('/tasks/{task_id}', response_model=TaskOut)
+def get_task(task_id: int, session = Depends(depends_db)):
+    t, u, c = aliased(Task), aliased(User), aliased(Category)
+    query = (
+        session.query(
+            t.title,
+            t.description,
+            t.created,
+            u.id,
+            u.username,
+            u.avatar,
+            c.name
+        ).select_from(
+            t
+        ).join(
+            u, t.customer_id == u.id
+        ).join(
+            c, t.category_id == c.id
+        ).filter(
+            t.id == task_id
+        )
+    )
+    
+    task = query.first()
+    (title, description, created, customer_id, customer_username, customer_avatar, caregory_name) = task
+    
+    return TaskOut(
+        title=title, 
+        description=description,
+        created=datetime.strftime(created, '%Y-%m-%d'), 
+        customer_id=customer_id, 
+        customer_username=customer_username, 
+        customer_avatar=customer_avatar, 
+        caregory_name=caregory_name
+    )
+    
 
 
 
