@@ -137,6 +137,15 @@ class ConversationInfo(BaseModel):
     companion_avatar: str
     last_message: str
     last_date: str
+
+
+class UserToVerify(BaseModel):
+    username: str
+
+
+class CategoryToAdd(BaseModel):
+    name: str
+    icon: str
     
 
 

@@ -11,7 +11,7 @@ import requests
 
 from security import hash_password, encode_jwt, decode_jwt, check_password
 from db import depends_db, UserRegister, UserOut, User, FreelancersCategory, Review,\
-    FreelancersOut, FreelancerInfo, Category, ProfileOut, UserCategory, UserReview, UsernameToChange, AvatarToChange
+    FreelancersOut, FreelancerInfo, Category, ProfileOut, UserCategory, UserReview, UsernameToChange, AvatarToChange, UserToVerify
 from helpers import get_user_by_token
 
 
@@ -80,6 +80,27 @@ def user_auth(username: str, password: str, session = Depends(depends_db)):
 @users_router.get("/users/me", response_model=UserOut)
 def user_info(token: str = Depends(oauth2_scheme), session = Depends(depends_db)):
     return get_user_by_token(token, session)
+
+
+@users_router.get("/users/role")
+def get_role(token: str = Depends(oauth2_scheme), session = Depends(depends_db)):
+    user = get_user_by_token(token, session)
+    return user.role
+
+
+@users_router.post("/users/verify")
+def verify_user(user_data: UserToVerify, token: str = Depends(oauth2_scheme), session = Depends(depends_db)):
+    user = get_user_by_token(token, session)
+    if user.role != 'admin':
+        raise HTTPException(status_code=401, detail="Нет доступа к такому функционалу")
+    user_to_verify_username = user_data.username
+    verifying_user = session.query(User).filter(User.username == user_to_verify_username).first()
+    if not verifying_user:
+        raise HTTPException(status_code=404, detail="Такого пользователя нет!")
+    verifying_user.verified = True
+    session.commit()
+    return {'message': 'Статус подтвержден!'}
+    
 
 
 @users_router.get("/users/freelancers/get", response_model = FreelancersOut)
