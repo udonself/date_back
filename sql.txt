@@ -1,0 +1,13 @@
+INSERT INTO categories VALUES
+(DEFAULT, 'Мужские часы', 'https://telegra.ph/file/3ca454e0919d167578e55.png'),
+(DEFAULT, 'Женские часы', 'https://telegra.ph/file/be81ee0930e84fcc145dd.png'),
+(DEFAULT, 'Очки', 'https://telegra.ph/file/18b364ac4ce779712f89e.png'),
+(DEFAULT, 'Ароматы', 'https://telegra.ph/file/164c62f87036b70758ff0.png'),
+(DEFAULT, 'Сумки', 'https://telegra.ph/file/25ef7641586eff8865c13.png'),
+(DEFAULT, 'Обувь', 'https://telegra.ph/file/f2bb571532dd79b2a58eb.png'),
+(DEFAULT, 'Одежда', 'https://telegra.ph/file/28d1700d01d45d6e23e05.png'),
+(DEFAULT, 'Аксесуары', 'https://telegra.ph/file/a9a5d26b0eb8fe9f7c64b.png'),
+(DEFAULT, 'Ювелирка', 'https://telegra.ph/file/8ad59f458f03be094fa80.png'),
+(DEFAULT, 'Ручки', 'https://telegra.ph/file/346ea8434c392ac27a1c3.png'),
+(DEFAULT, 'Поддержаные часы', 'https://telegra.ph/file/e7943ed810d92249d9d89.png'),
+(DEFAULT, 'Скидки & акции', 'https://telegra.ph/file/c6df3e8871716f2ab9038.png');
