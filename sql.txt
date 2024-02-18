@@ -11,3 +11,58 @@ INSERT INTO categories VALUES
 (DEFAULT, 'Ручки', 'https://telegra.ph/file/346ea8434c392ac27a1c3.png'),
 (DEFAULT, 'Поддержаные часы', 'https://telegra.ph/file/e7943ed810d92249d9d89.png'),
 (DEFAULT, 'Скидки & акции', 'https://telegra.ph/file/c6df3e8871716f2ab9038.png');
+
+
+INSERT INTO brands(name) VALUES
+('gucci'),('versace'),('rolex'),('burberry'),('gucci');
+
+
+-- categories
+-- 1 - man watches
+-- 2 - woman watches
+
+-- brands
+-- 2 - gucci
+-- 3 - versace
+-- 4 - rolex
+
+SELECT * FROM products;
+
+INSERT INTO products VALUES 
+(DEFAULT, 'Submariner Automatic Chronometer Blue Dial Mens Watch', 'https://telegra.ph/file/2d013460129047379f372.png', 13995, 'Silver-tone stainless steel case with a two-tone (silver-tone and yellow gold-tone) stainless steel and 18kt yellow gold rolex oyster bracelet. Uni-directional rotating 18kt yellow gold bezel with a blue top ring.', 1, 4)
+
+
+-- categories
+-- 1 - man watches
+-- 2 - woman watches
+
+-- brands
+-- 1 - omaga
+-- 2 - gucci
+-- 3 - versace
+-- 4 - rolex
+
+select * from categories;
+
+-- select * from brands;
+SELECT * FROM products;
+
+INSERT INTO products VALUES 
+(DEFAULT, 'Seamaster Railmaster Автоматические мужские часы ', 'https://telegra.ph/file/8128101f37595cb644c09.png', 317, 'Stainless steel case with a stainless steel bracelet. Fixed stainless steel bezel. Brushed grey dial with luminous silver-tone hands and index hour markers. Arabic numerals mark the 3, 6, 9 and 12 oclock positions.',
+ 1,
+ 1)
+ INSERT INTO products VALUES 
+(DEFAULT, 'Seamaster Railmaster Автоматические мужские часы ', 'https://telegra.ph/file/6e2e52db0f550913b038c.png', 8253, 'Silver-tone stainless steel case with a silver-tone stainless steel oyster bracelet. Fixed domed silver-tone stainless steel bezel. Black dial with silver-tone Mercedes-logo, sword, and Breguet-style shape hands and stick with Arabic numerals at 3, 6, and 9 oclock positions hour markers.',
+ 1,
+ 4)
+  INSERT INTO products VALUES 
+(DEFAULT, 'HydroConquest Мужские автоматические часы с синим циферблатом ', 'https://telegra.ph/file/5ce2c0772419238d3357b.png', 3553, 'Stainless steel case with a stainless steel bracelet. Uni-directional rotating stainless steel bezel with a blue ceramic ring. Blue dial with luminous silver-tone hands and dot hour markers. Arabic numerals appear at the 6, 9 and 12 oclock positions.',
+ 1,
+ 3)
+   INSERT INTO products VALUES 
+(DEFAULT, 'Мужские часы Tradition с автоматическим антрацитовым циферблатом', 'https://telegra.ph/file/6cef618b1a9273039bb01.png', 5243, 'Rose gold PVD stainless steel case with a brown leather strap. Fixed rose gold PVD bezel. Anthracite dial with rose gold-tone dauphine-style hands and index hour markers. A Roman numeral appears at the 12 oclock position.',
+ 1,
+ 2)
+ 
+ delete from products where id=1;
+update products set imageUrl = 'https://telegra.ph/file/6e2e52db0f550913b038c.png' where id=1;
