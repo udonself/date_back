@@ -64,4 +64,9 @@ class Order(Base):
     id = Column(Integer, primary_key=True)
     cartId = Column(Integer, ForeignKey(f'{Cart.__tablename__}.id'))
     created = Column(DateTime, default=datetime.now)
+    phone = Column(String(70))
+    city = Column(String(50))
+    street = Column(String(70))
+    house = Column(Integer)
+    apartment = Column(Integer)
 

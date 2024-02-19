@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 # from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends
+from sqlalchemy import or_
 # from sqlalchemy import func
 
 # # from security import hash_password, encode_jwt, decode_jwt, check_password
@@ -61,3 +62,25 @@ def get_products(category_id: int, session = Depends(depends_db)):
         'category': category_name,
         'products': products
     }
+
+
+
+@products_router.get("/search/{pattern}", response_model=List[ProductCardOut])
+def get_products(pattern: str, session = Depends(depends_db)):
+
+    products = session.query(
+        Product.id,
+        Product.name,
+        Product.imageUrl,
+        Product.price,
+        Brand.name.label('brand')
+    ).filter(
+        or_(
+            Product.name.like(f'%{pattern}%'),
+            Brand.name.like(f'%{pattern}%')
+        )
+    ).join(
+        Brand, Product.brandId == Brand.id
+    ).all()
+    
+    return products
