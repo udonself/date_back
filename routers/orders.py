@@ -1,4 +1,5 @@
 from typing import List
+import os
 
 from fastapi import APIRouter, HTTPException
 from fastapi import Depends
@@ -6,6 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import func
 from sqlalchemy.orm import aliased, Session
 from pydantic import BaseModel
+import requests
 
 from db import depends_db, Cart, Order, ProductOfCart, Product
 from helpers import get_user_by_token
@@ -95,6 +97,45 @@ def add_to_cart(order_data: OrderData, token: str = Depends(oauth2_scheme), sess
     session.add(order)
     cart.active = False
     session.commit()
+    
+    # telegram notification
+    products_of_order = session.query(
+        Product.name,
+        ProductOfCart.quantity
+    ).select_from(
+        ProductOfCart
+    ).join(
+        Product,
+        ProductOfCart.productId == Product.id
+    ).filter(
+        ProductOfCart.cartId == order.cartId
+    ).all()
+    
+    total_price = session.query(
+        func.sum(ProductOfCart.quantity * Product.price)
+    ).select_from(
+        ProductOfCart
+    ).join(
+        Product,
+        ProductOfCart.productId == Product.id
+    ).filter(
+        ProductOfCart.cartId == order.cartId
+    ).scalar()
+    
+    procusts_string = '\n'.join([
+        f'<i>{i+1}</i>. {name} <code>x{quantity}</code>' for i, (name, quantity) in enumerate(products_of_order)
+    ])
+    
+    notification_text = f'<b>Новый заказ №<code>{order.id}</code></b>\n\n<i>Телефон заказчика</i>: <code>{order.phone}</code>\nАдрес доставки: <code>г. {order.city}. ул. {order.street}, д.{order.house}, кв.{order.apartment}</code>\n\n<i>Содержимое заказа</i>:\n{procusts_string}\n\nИтого: <code>{total_price}</code> BYN'
+    
+    r = requests.get(
+        f'https://api.telegram.org/bot{os.getenv("TELEGRAM_BOT_TOKEN")}/sendMessage',
+        params = {
+            'chat_id': os.getenv("MANAGER_TELEGRAM_ID"),
+            'text': notification_text,
+            'parse_mode' : 'HTML'
+        }
+    )
     
     return {
         'ok': True
