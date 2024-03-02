@@ -66,3 +66,108 @@ INSERT INTO products VALUES
  
  delete from products where id=1;
 update products set imageUrl = 'https://telegra.ph/file/6e2e52db0f550913b038c.png' where id=1;
+
+
+
+-- categories
+-- 1 - man watches
+-- 2 - woman watches
+-- 3 - watches
+-- 4 - aroma
+-- 5 - sumki
+-- 6 - shoe
+-- 7 - clothes 
+-- 8 - accesuary
+-- 9 - yuvelirka
+-- 10 - pens
+-- 11 -- poddderzbanie watches
+
+select * from categories;
+
+select * from brands;
+
+-- brands
+-- 1 - omega
+-- 2 - gucci
+-- 3 - versace
+-- 4 - rolex
+-- 5 - burberry
+
+SELECT * FROM products;
+
+delete from products where id = 10;
+
+INSERT INTO products VALUES 
+(DEFAULT, 'Datejust 36 Automatic Diamond Mens Watch', 'https://telegra.ph/file/eec06a94ec54342d90b9f.png',
+ 965,
+ 'Silver-tone stainless steel case with a two-tone (silver-tone and gold-tone) yellow gold/stainless steel jubilee bracelet. Fixed fluted yellow gold 18kt yellow gold bezel. Blue vignette dial with gold-tone hands and diamond hour markers. Minute markers around the outer rim. Dial Type: Analog.',
+ 11,
+ 5)
+
+INSERT INTO products VALUES 
+(DEFAULT, 'Gold Plated Ballpoint Pen and Cufflink Set', 'https://telegra.ph/file/b233e708b9624a5879ad5.png',
+ 96,
+ 'Picasso and Co gift set featuring a ballpoint pen in gold-plated brass and a pair of stainless steel cufflinks with a black enamel inlay. Nib Size: 0.5. Closed Length: 13.5cm.',
+ 10,
+ 1)
+
+
+INSERT INTO products VALUES 
+(DEFAULT, 'Ladies Pink Millenia Necklace', 'https://telegra.ph/file/1b7b4c6b37385cb965dca.png',
+ 60,
+ 'Swarovski Ladies Necklace. SKU: 5614933. Color: Pink. Metal Type: Rose Gold Plated. Gem stone type: Cubic Zirconia. Swarovski Ladies Pink Millenia Necklace.',
+ 9,
+ 3)
+
+INSERT INTO products VALUES 
+(DEFAULT, 'Silver Engraved Heart Motif Trademark Bracelet', 'https://telegra.ph/file/a6a944885420d6cd8d08c.png',
+ 1920,
+ 'Gucci Ladies Bracelets. SKU: YBA223513001. Color: Silver-tone. Metal Type: Sterling Silver. Metal Stamp: 925-Sterling. Gem stone type: None. Bracelet style: 1 Band. Heart bracelet with Gucci trademark. Gucci Silver Engraved Heart Motif Trademark Bracelet.',
+ 8,
+ 2)
+
+
+
+INSERT INTO products VALUES 
+(DEFAULT, 'Ladies Dark Brown Penberth Shearling Single-Breasted Coat', 'https://telegra.ph/file/a16a907614de0415fa9e6.png',
+ 920,
+ 'Burberry Ladies Outerwear. Fashion category: Coats & Jackets. SKU: 8030091. Color: Dark Brown. Burberry Ladies Dark Brown Penberth Shearling Single-Breasted Coat.',
+ 7,
+ 5)
+
+
+INSERT INTO products VALUES 
+(DEFAULT, 'Crimson Ladies Greenwich Convertible Shoulder Bag', 'https://telegra.ph/file/001be09fd72d48257f9f6.png',
+ 920,
+ 'Michael Kors Ladies Shoulder Bag. SKU: 30H1GGRL6V-602. Barcode: 194900931028. Color: Crimson. Size: 25 x 15 x 8 cm. Michael Kors Crimson Ladies Greenwich Convertible Shoulder Bag - Crimson.',
+ 5,
+ 6)
+
+INSERT INTO products VALUES 
+(DEFAULT, 'Black High-Top 100 Alce Belted Leather Sneaker', 'https://telegra.ph/file/f6eb516676a214e9d1098.png',
+ 119,
+ 'Buscemi Mens Sneakers. SKU: BCS22701 499. Color: Black/Black. Shoe Style: High Tops. Vamp Style: Lace-up. Upper Material: Leather.',
+ 6,
+ 3)
+ 
+INSERT INTO products VALUES 
+(DEFAULT, 'Unisex Club De Nuit Untold EDP', 'https://telegra.ph/file/f5547d4bbfb74fc71402a.png',
+ 119,
+ 'Immerse yourself in the captivating allure of the Club De Nuit Untold EDP Spray, a remarkable addition to the esteemed Club De Nuit collection from the design house Armaf.',
+ 4,
+ 1)
+ 
+
+INSERT INTO products VALUES 
+(DEFAULT, 'Polarized Smoke Square Mens Sunglasses', 'https://telegra.ph/file/8dbfb88ef588ff5a22ab9.png',
+ 70,
+ 'Tom Ford Sunglasses. Series number: FT0956-D. Color code: 01D. Shape: Square. Lens Width: 52 mm. Lens Bridge: 21 mm. Arm Length: 145 mm.',
+ 3,
+ 5)
+ 
+INSERT INTO products VALUES 
+(DEFAULT, 'Essentials Quartz', 'https://telegra.ph/file/9446d0107c211d4a3543c.png',
+ 13995,
+ 'Yellow gold-tone stainless steel case with a black (croco-embossed) leather strap. Fixed yellow gold-tone stainless steel bezel. White dial with black hands and Roman numeral hour markers.',
+ 2,
+ 3)

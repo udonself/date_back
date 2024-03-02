@@ -18,6 +18,32 @@ carts_router = APIRouter(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/carts/add')
 
 
+@carts_router.get("/amountOfItems")
+def get_amount_of_cart_items(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+    
+    user = get_user_by_token(token, session)
+    
+    cart = session.query(
+        Cart
+    ).filter(
+        Cart.userId == user.id,
+        Cart.active == True
+    ).first()
+    
+    if not cart:
+        return 0
+    
+    amount = session.query(
+        func.sum(ProductOfCart.quantity).label('total_items')
+    ).select_from(
+        ProductOfCart
+    ).filter(
+        ProductOfCart.cartId == cart.id
+    ).scalar()
+    
+    return amount
+
+
 @carts_router.get("/get", response_model=List[CartProductOut])
 def get_cart(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     

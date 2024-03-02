@@ -3,13 +3,15 @@ import os
 
 from fastapi import APIRouter, HTTPException
 from fastapi import Depends
+from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy import func
+from sqlalchemy import func, String
 from sqlalchemy.orm import aliased, Session
 from pydantic import BaseModel
 import requests
+import xlsxwriter
 
-from db import depends_db, Cart, Order, ProductOfCart, Product
+from db import depends_db, Cart, Order, ProductOfCart, Product, User
 from helpers import get_user_by_token
 
 
@@ -25,6 +27,46 @@ class OrderOut(BaseModel):
     amountOfProducts: int
     date: str
     totalPrice: float
+    
+    
+@orders_router.get('/xlsx_report')
+def get_report(session: Session = Depends(depends_db)):
+    
+    query = session.query(
+        User.id.label('user_id'),
+        User.username.label('user_username'),
+        Order.id,
+        func.cast(Order.created, String),
+        (func.concat('г. ', Order.city, ', ул. ', Order.street, ', д. ', func.cast(Order.house, String), ', кв. ', func.cast(Order.apartment, String))).label('address'),
+        func.string_agg(Product.name + ' (x' + func.cast(ProductOfCart.quantity, String) + ')', ', ').label('products'),
+        func.sum(Product.price * ProductOfCart.quantity).label('total_price')) \
+    .join(Cart, Order.cartId == Cart.id) \
+    .join(User, Cart.userId == User.id) \
+    .join(ProductOfCart, ProductOfCart.cartId == Cart.id) \
+    .join(Product, ProductOfCart.productId == Product.id) \
+    .group_by(Order.id, User.id) \
+    .order_by(Order.created)
+
+    orders = query.all()
+    
+    workbook = xlsxwriter.Workbook('report.xlsx')
+    worksheet = workbook.add_worksheet()
+    
+    headers = ['user_id', 'user_username', 'order_id', 'order_created', 'address', 'products', 'total_price']
+    for col, header in enumerate(headers):
+        worksheet.write(0, col, header)
+        
+    for row, row_data in enumerate(orders, start=1):
+        for col, cell_data in enumerate(row_data):
+            worksheet.write(row, col, cell_data)
+    
+    worksheet.autofit()
+    
+    workbook.close()
+    
+    
+    return FileResponse('report.xlsx', filename="report.xlsx", media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    
 
 
 @orders_router.get('/get', response_model=List[OrderOut])
