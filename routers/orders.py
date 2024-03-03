@@ -1,5 +1,7 @@
 from typing import List
 import os
+import math
+from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
 from fastapi import Depends
@@ -33,9 +35,9 @@ class OrderOut(BaseModel):
 def get_report(session: Session = Depends(depends_db)):
     
     query = session.query(
+        Order.id,
         User.id.label('user_id'),
         User.username.label('user_username'),
-        Order.id,
         func.cast(Order.created, String),
         (func.concat('г. ', Order.city, ', ул. ', Order.street, ', д. ', func.cast(Order.house, String), ', кв. ', func.cast(Order.apartment, String))).label('address'),
         func.string_agg(Product.name + ' (x' + func.cast(ProductOfCart.quantity, String) + ')', ', ').label('products'),
@@ -52,7 +54,7 @@ def get_report(session: Session = Depends(depends_db)):
     workbook = xlsxwriter.Workbook('report.xlsx')
     worksheet = workbook.add_worksheet()
     
-    headers = ['user_id', 'user_username', 'order_id', 'order_created', 'address', 'products', 'total_price']
+    headers = ['order_id', 'user_id', 'user_username', 'order_created', 'address', 'products', 'total_price']
     for col, header in enumerate(headers):
         worksheet.write(0, col, header)
         
@@ -64,8 +66,10 @@ def get_report(session: Session = Depends(depends_db)):
     
     workbook.close()
     
+    current_date = datetime.now()
+    formatted_date = current_date.strftime("%d-%m-%Y")
     
-    return FileResponse('report.xlsx', filename="report.xlsx", media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    return FileResponse('report.xlsx', filename=f"report_{formatted_date}.xlsx", media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     
 
 
@@ -163,6 +167,9 @@ def add_to_cart(order_data: OrderData, token: str = Depends(oauth2_scheme), sess
     ).filter(
         ProductOfCart.cartId == order.cartId
     ).scalar()
+    
+    if total_price >= 100:
+        total_price = math.floor(total_price - (total_price * 0.1))
     
     procusts_string = '\n'.join([
         f'<i>{i+1}</i>. {name} <code>x{quantity}</code>' for i, (name, quantity) in enumerate(products_of_order)
