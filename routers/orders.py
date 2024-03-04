@@ -13,7 +13,7 @@ from pydantic import BaseModel
 import requests
 import xlsxwriter
 
-from db import depends_db, Cart, Order, ProductOfCart, Product, User
+from db import depends_db, Cart, Order, ProductOfCart, Product, User, Brand
 from helpers import get_user_by_token
 
 
@@ -72,7 +72,6 @@ def get_report(session: Session = Depends(depends_db)):
     return FileResponse('report.xlsx', filename=f"report_{formatted_date}.xlsx", media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     
 
-
 @orders_router.get('/get', response_model=List[OrderOut])
 def get_orders(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     
@@ -101,14 +100,80 @@ def get_orders(token: str = Depends(oauth2_scheme), session: Session = Depends(d
     ).all()
     
     return [
-        OrderOut(id=id, amountOfProducts=amountOfProducts, date=date.strftime('%d-%m-%Y'), totalPrice=totalPrice) for (id, amountOfProducts, date, totalPrice) in orders
+        OrderOut(
+            id=id,
+            amountOfProducts=amountOfProducts,
+            date=date.strftime('%d-%m-%Y'),
+            totalPrice=totalPrice if totalPrice < 100 else math.floor(totalPrice - totalPrice * 0.1)
+        ) for (id, amountOfProducts, date, totalPrice) in orders
     ]
+
+
+class OrderItem(BaseModel):
+    name: str
+    brand: str
+    imageUrl: str
+    quantity: int
+    price: float
+
+
+class FullOrderData(BaseModel):
+    items: List[OrderItem]
+    totalPrice: float
+
+
+@orders_router.get('/s/{order_id}', response_model=FullOrderData)
+def get_order(order_id: int, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     
-# export interface IOrder {
-# id: number,
-# amountOfProducts: number,
-# date: string,
-# totalPrice: number
+    user = get_user_by_token(token, session)
+    
+    subquery = session.query(
+        Cart.id.label('cartId')
+    ).select_from(
+        Order
+    ).join(
+        Cart, Order.cartId == Cart.id
+    ).filter(
+        Order.id == order_id,
+        Cart.userId == user.id
+    ).subquery()
+    
+    order_products = session.query(
+        Product.name,
+        Product.imageUrl,
+        Brand.name.label('brand'),
+        ProductOfCart.quantity,
+        func.sum(Product.price * ProductOfCart.quantity).label('price')
+    ).select_from(
+        ProductOfCart
+    ).join(
+        Product,
+        Product.id == ProductOfCart.productId
+    ).join(
+        Brand,
+        Brand.id == Product.brandId
+    ).group_by(
+        Product.name,
+        Product.imageUrl,
+        Brand.name,
+        ProductOfCart.quantity
+    ).filter(
+        ProductOfCart.cartId == subquery.c.cartId
+    ).all()
+    
+    products_out = [OrderItem(
+        name=name, imageUrl=imageUrl, brand=brand, quantity=quantity, price=price
+    ) for (name, imageUrl, brand, quantity, price) in order_products]
+    
+    total_price = sum(map(lambda item: item.price, products_out))
+    if total_price >= 100:
+        total_price = math.floor(total_price - total_price * 0.1)
+    
+    return FullOrderData(
+        items=products_out,
+        totalPrice=total_price
+    )
+    
 
 
 class OrderData(BaseModel):
