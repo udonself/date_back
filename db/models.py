@@ -39,6 +39,7 @@ class Product(Base):
     description = Column(String(300))
     categoryId = Column(Integer, ForeignKey(f'{Category.__tablename__}.id'))
     brandId = Column(Integer, ForeignKey(f'{Brand.__tablename__}.id'))
+    inStock = Column(Integer, default=0)
     
 
 class Cart(Base):

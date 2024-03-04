@@ -27,7 +27,8 @@ def get_prouct(product_id: int, session = Depends(depends_db)):
         Product.imageUrl,
         Product.price,
         Product.description,
-        Brand.name.label('brand')
+        Brand.name.label('brand'),
+        Product.inStock
     ).filter(
         Product.id == product_id
     ).join(
@@ -51,11 +52,14 @@ def get_products(category_id: int, session = Depends(depends_db)):
         Product.name,
         Product.imageUrl,
         Product.price,
-        Brand.name.label('brand')
+        Brand.name.label('brand'),
+        Product.inStock
     ).filter(
         Product.categoryId == category_id
     ).join(
         Brand, Product.brandId == Brand.id
+    ).order_by(
+        Product.inStock
     ).all()
     
     return {
@@ -73,7 +77,8 @@ def get_products(pattern: str, session = Depends(depends_db)):
         Product.name,
         Product.imageUrl,
         Product.price,
-        Brand.name.label('brand')
+        Brand.name.label('brand'),
+        Product.inStock
     ).filter(
         or_(
             Product.name.like(f'%{pattern}%'),

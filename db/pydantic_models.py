@@ -20,6 +20,7 @@ class ProductCardOut(BaseModel):
     imageUrl: str
     price: float
     brand: str
+    inStock: int
 
 
 class CategoriesProductCardsOut(BaseModel):
@@ -34,6 +35,7 @@ class FullProductOut(BaseModel):
     price: float
     brand: str
     description: str
+    inStock: int
 
 
 class CartProductOut(BaseModel):
