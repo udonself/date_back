@@ -72,3 +72,11 @@ class Order(Base):
     apartment = Column(Integer)
     status = Column(String(20), default='in progress')  # in progress, canceled, completed
 
+
+class StockReplenishment(Base):
+    __tablename__ = 'stock_replenishments'
+    
+    id = Column(Integer, primary_key=True)
+    productId = Column(Integer, ForeignKey(f'{Product.__tablename__}.id'))
+    quantity = Column(Integer)
+    created = Column(DateTime, default=datetime.now)

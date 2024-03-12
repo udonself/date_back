@@ -2,6 +2,7 @@ from typing import List
 import os
 import math
 from datetime import datetime
+import random
 
 from fastapi import APIRouter, HTTPException
 from fastapi import Depends, HTTPException
@@ -14,8 +15,8 @@ from pydantic import BaseModel
 import requests
 import xlsxwriter
 
-from db import depends_db, Cart, Order, ProductOfCart, Product, User, Brand
-from helpers import get_user_by_token
+from db import depends_db, Cart, Order, ProductOfCart, Product, User, Brand, StockReplenishment
+from helpers import get_user_by_token, prepare_workbook
 
 
 orders_router = APIRouter(
@@ -42,7 +43,7 @@ def get_sales(start_date: str, end_date: str, session: Session = Depends(depends
     ).subquery()
     
     products = session.query(
-        Product.id,
+        # Product.id,
         Product.name,
         Product.inStock,
         func.coalesce(func.sum(sold_products_subquery.c.quantity), 0).label('TotalSold')
@@ -58,23 +59,13 @@ def get_sales(start_date: str, end_date: str, session: Session = Depends(depends
         func.coalesce(func.sum(sold_products_subquery.c.quantity), 0).desc()
     ).all()
 
-    # Выполнение запроса
-    for row in products:
-        print(row)
         
-    workbook = xlsxwriter.Workbook('report.xlsx')
-    worksheet = workbook.add_worksheet()
-    
-    headers = ['Айди товара', 'Название', 'В наличии', f'Продано в период с {start_date} по {end_date}']
-    for col, header in enumerate(headers):
-        worksheet.write(0, col, header)
-        
-    for row, row_data in enumerate(products, start=1):
-        for col, cell_data in enumerate(row_data):
-            worksheet.write(row, col, cell_data)
-    
-    worksheet.autofit()
-    
+    workbook, worksheet = prepare_workbook(
+        report_number=random.randint(10000, 99999),
+        title=f'Количество продаж и остаток с {start_date} по {end_date}',
+        headers=['Товар', 'В наличии', f'Продано в период с {start_date} по {end_date}'],
+        data=products
+    )
     workbook.close()
     
     current_date = datetime.now()
@@ -88,7 +79,7 @@ def get_orders(start_date: str, end_date: str, session: Session = Depends(depend
     
     query = session.query(
         Order.id,
-        User.id.label('user_id'),
+        # User.id.label('user_id'),
         # User.username.label('user_username'),
         func.cast(Order.created, String),
         (func.concat('г. ', Order.city, ', ул. ', Order.street, ', д. ', func.cast(Order.house, String), ', кв. ', func.cast(Order.apartment, String))).label('address'),
@@ -104,18 +95,47 @@ def get_orders(start_date: str, end_date: str, session: Session = Depends(depend
 
     orders = query.all()
     
-    workbook = xlsxwriter.Workbook('report.xlsx')
-    worksheet = workbook.add_worksheet()
+    workbook, worksheet = prepare_workbook(
+        report_number=random.randint(10000, 99999),
+        title=f'Детализация заказов с {start_date} по {end_date}',
+        headers = ['Айди заказа', 'Дата', 'Адрес', 'Товары', 'Итоговая цена'],
+        data=orders
+    )
+    workbook.close()
     
-    headers = ['Айди заказа', 'Айди пользователя', 'Дата', 'Адрес', 'Товары', 'Итоговая цена']
-    for col, header in enumerate(headers):
-        worksheet.write(0, col, header)
-        
-    for row, row_data in enumerate(orders, start=1):
-        for col, cell_data in enumerate(row_data):
-            worksheet.write(row, col, cell_data)
+    current_date = datetime.now()
+    formatted_date = current_date.strftime("%d-%m-%Y")
     
-    worksheet.autofit()
+    return FileResponse('report.xlsx', filename=f"report_{formatted_date}.xlsx", media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+
+@orders_router.get('/xlsx/repleishments/{start_date}/{end_date}')
+def get_repleishments(start_date: str, end_date: str, session: Session = Depends(depends_db)):
+    
+    query = session.query(
+        StockReplenishment.id,
+        func.cast(StockReplenishment.created, String),
+        Product.name,
+        StockReplenishment.quantity
+    ).select_from(
+        StockReplenishment
+    ).join(
+        Product,
+        Product.id == StockReplenishment.productId
+    ).filter(
+        StockReplenishment.created >= start_date, StockReplenishment.created <= end_date
+    ).order_by(
+        StockReplenishment.created.desc()
+    )
+
+    orders = query.all()
+    
+    workbook, worksheet = prepare_workbook(
+        report_number=random.randint(10000, 99999),
+        title=f'Пополнения наличия с {start_date} по {end_date}',
+        headers = ['Айди пополнения', 'Дата', 'Товар', 'Количество'],
+        data=orders
+    )
     
     workbook.close()
     
@@ -123,6 +143,47 @@ def get_orders(start_date: str, end_date: str, session: Session = Depends(depend
     formatted_date = current_date.strftime("%d-%m-%Y")
     
     return FileResponse('report.xlsx', filename=f"report_{formatted_date}.xlsx", media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    
+    
+
+@orders_router.get('/xlsx/repleishments_sum/{start_date}/{end_date}')
+def get_repleishments(start_date: str, end_date: str, session: Session = Depends(depends_db)):
+    
+    query = session.query(
+        # StockReplenishment.id,
+        # StockReplenishment.created,
+        Product.name,
+        func.sum(StockReplenishment.quantity).label('total_amount')
+    ).select_from(
+        StockReplenishment
+    ).join(
+        Product,
+        Product.id == StockReplenishment.productId
+    ).filter(
+        StockReplenishment.created >= start_date, StockReplenishment.created <= end_date
+    ).group_by(
+        Product.id
+    ).order_by(
+        func.sum(StockReplenishment.quantity).desc()
+    )
+
+    orders = query.all()
+    
+    workbook, worksheet = prepare_workbook(
+        report_number=random.randint(10000, 99999),
+        title=f'Пополнения наличия с {start_date} по {end_date}',
+        headers = ['Товар', 'Количество'],
+        data=orders
+    )
+    
+    workbook.close()
+    
+    current_date = datetime.now()
+    formatted_date = current_date.strftime("%d-%m-%Y")
+    
+    return FileResponse('report.xlsx', filename=f"report_{formatted_date}.xlsx", media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    
+    
     
 
 class DataToChangeStatus(BaseModel):

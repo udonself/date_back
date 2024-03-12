@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordBearer
 # from sqlalchemy import func
 
 # # from security import hash_password, encode_jwt, decode_jwt, check_password
-from db import depends_db, Product, Brand, ProductCardOut, Category, CategoriesProductCardsOut, FullProductOut
+from db import depends_db, Product, Brand, ProductCardOut, Category, CategoriesProductCardsOut, FullProductOut, StockReplenishment
 from helpers import get_user_by_token
 
 
@@ -64,6 +64,12 @@ def add_product_stock(data: ProductToAddStock, token: str = Depends(oauth2_schem
 
     product.inStock += data.amount_to_add
     
+    replenishment = StockReplenishment(
+        productId=product.id,
+        quantity=data.amount_to_add
+    )
+    
+    session.add(replenishment)
     session.commit()
     
     return {
