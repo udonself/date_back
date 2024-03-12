@@ -70,4 +70,5 @@ class Order(Base):
     street = Column(String(70))
     house = Column(Integer)
     apartment = Column(Integer)
+    status = Column(String(20), default='in progress')  # in progress, canceled, completed
 

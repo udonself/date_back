@@ -1,0 +1,83 @@
+-- categories
+INSERT INTO categories (id, name, imageUrl) VALUES (1, 'Мужские часы', 'https://telegra.ph/file/3ca454e0919d167578e55.png');
+INSERT INTO categories (id, name, imageUrl) VALUES (2, 'Женские часы', 'https://telegra.ph/file/be81ee0930e84fcc145dd.png');
+INSERT INTO categories (id, name, imageUrl) VALUES (3, 'Очки', 'https://telegra.ph/file/18b364ac4ce779712f89e.png');
+INSERT INTO categories (id, name, imageUrl) VALUES (4, 'Ароматы', 'https://telegra.ph/file/164c62f87036b70758ff0.png');
+INSERT INTO categories (id, name, imageUrl) VALUES (5, 'Сумки', 'https://telegra.ph/file/25ef7641586eff8865c13.png');
+INSERT INTO categories (id, name, imageUrl) VALUES (6, 'Обувь', 'https://telegra.ph/file/f2bb571532dd79b2a58eb.png');
+INSERT INTO categories (id, name, imageUrl) VALUES (7, 'Одежда', 'https://telegra.ph/file/28d1700d01d45d6e23e05.png');
+INSERT INTO categories (id, name, imageUrl) VALUES (8, 'Аксесуары', 'https://telegra.ph/file/a9a5d26b0eb8fe9f7c64b.png');
+INSERT INTO categories (id, name, imageUrl) VALUES (9, 'Ювелирка', 'https://telegra.ph/file/8ad59f458f03be094fa80.png');
+INSERT INTO categories (id, name, imageUrl) VALUES (10, 'Ручки', 'https://telegra.ph/file/346ea8434c392ac27a1c3.png');
+INSERT INTO categories (id, name, imageUrl) VALUES (11, 'Поддержаные часы', 'https://telegra.ph/file/e7943ed810d92249d9d89.png');
+INSERT INTO categories (id, name, imageUrl) VALUES (12, 'Скидки & акции', 'https://telegra.ph/file/c6df3e8871716f2ab9038.png');
+
+
+
+-- brands 
+INSERT INTO brands (id, name) VALUES (1, 'omega');
+INSERT INTO brands (id, name) VALUES (2, 'gucci');
+INSERT INTO brands (id, name) VALUES (3, 'versace');
+INSERT INTO brands (id, name) VALUES (4, 'rolex');
+INSERT INTO brands (id, name) VALUES (5, 'burberry');
+INSERT INTO brands (id, name) VALUES (6, 'gucci');
+
+
+
+-- products
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (5, 'HydroConquest Мужские автоматические часы с синим циферблатом ', 'https://telegra.ph/file/5ce2c0772419238d3357b.png', 3553.0, 'Stainless steel case with a stainless steel bracelet. Uni-directional rotating stainless steel bezel with a blue ceramic ring. Blue dial with luminous silver-tone hands and dot hour markers. Arabic numerals appear at the 6, 9 and 12 oclock positions.', 1, 3, 0);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (7, 'Essentials Quartz', 'https://telegra.ph/file/9446d0107c211d4a3543c.png', 13995.0, 'Yellow gold-tone stainless steel case with a black (croco-embossed) leather strap. Fixed yellow gold-tone stainless steel bezel. White dial with black hands and Roman numeral hour markers.', 2, 3, 0);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (8, 'Polarized Smoke Square Mens Sunglasses', 'https://telegra.ph/file/8dbfb88ef588ff5a22ab9.png', 70.0, 'Tom Ford Sunglasses. Series number: FT0956-D. Color code: 01D. Shape: Square. Lens Width: 52 mm. Lens Bridge: 21 mm. Arm Length: 145 mm.', 3, 5, 0);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (11, 'Black High-Top 100 Alce Belted Leather Sneaker', 'https://telegra.ph/file/f6eb516676a214e9d1098.png', 119.0, 'Buscemi Mens Sneakers. SKU: BCS22701 499. Color: Black/Black. Shoe Style: High Tops. Vamp Style: Lace-up. Upper Material: Leather.', 6, 3, 0);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (12, 'Crimson Ladies Greenwich Convertible Shoulder Bag', 'https://telegra.ph/file/001be09fd72d48257f9f6.png', 920.0, 'Michael Kors Ladies Shoulder Bag. SKU: 30H1GGRL6V-602. Barcode: 194900931028. Color: Crimson. Size: 25 x 15 x 8 cm. Michael Kors Crimson Ladies Greenwich Convertible Shoulder Bag - Crimson.', 5, 6, 0);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (13, 'Ladies Dark Brown Penberth Shearling Single-Breasted Coat', 'https://telegra.ph/file/a16a907614de0415fa9e6.png', 920.0, 'Burberry Ladies Outerwear. Fashion category: Coats & Jackets. SKU: 8030091. Color: Dark Brown. Burberry Ladies Dark Brown Penberth Shearling Single-Breasted Coat.', 7, 5, 0);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (14, 'Silver Engraved Heart Motif Trademark Bracelet', 'https://telegra.ph/file/a6a944885420d6cd8d08c.png', 1920.0, 'Gucci Ladies Bracelets. SKU: YBA223513001. Color: Silver-tone. Metal Type: Sterling Silver. Metal Stamp: 925-Sterling. Gem stone type: None. Bracelet style: 1 Band. Heart bracelet with Gucci trademark. Gucci Silver Engraved Heart Motif Trademark Bracelet.', 8, 2, 0);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (15, 'Ladies Pink Millenia Necklace', 'https://telegra.ph/file/1b7b4c6b37385cb965dca.png', 60.0, 'Swarovski Ladies Necklace. SKU: 5614933. Color: Pink. Metal Type: Rose Gold Plated. Gem stone type: Cubic Zirconia. Swarovski Ladies Pink Millenia Necklace.', 9, 3, 0);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (16, 'Gold Plated Ballpoint Pen and Cufflink Set', 'https://telegra.ph/file/b233e708b9624a5879ad5.png', 96.0, 'Picasso and Co gift set featuring a ballpoint pen in gold-plated brass and a pair of stainless steel cufflinks with a black enamel inlay. Nib Size: 0.5. Closed Length: 13.5cm.', 10, 1, 0);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (17, 'Datejust 36 Automatic Diamond Mens Watch', 'https://telegra.ph/file/eec06a94ec54342d90b9f.png', 965.0, 'Silver-tone stainless steel case with a two-tone (silver-tone and gold-tone) yellow gold/stainless steel jubilee bracelet. Fixed fluted yellow gold 18kt yellow gold bezel. Blue vignette dial with gold-tone hands and diamond hour markers. Minute markers around the outer rim. Dial Type: Analog.', 11, 5, 0);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (6, 'Мужские часы Tradition с автоматическим антрацитовым циферблатом', 'https://telegra.ph/file/6cef618b1a9273039bb01.png', 5243.0, 'Rose gold PVD stainless steel case with a brown leather strap. Fixed rose gold PVD bezel. Anthracite dial with rose gold-tone dauphine-style hands and index hour markers. A Roman numeral appears at the 12 oclock position.', 1, 2, 10);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (2, 'Очки солнцезащитные GG1372S 001 56', 'https://telegra.ph/file/4136cc155af7839331960.png', 13995.0, 'Gucci Sunglasses. Series number: GG1372S. Color code: 001. Shape: Square. Lens Width: 56 mm. Lens Bridge: 20 mm.', 3, 2, 14);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (3, 'Seamaster Railmaster Автоматические мужские часы ', 'https://telegra.ph/file/8128101f37595cb644c09.png', 317.0, 'Stainless steel case with a stainless steel bracelet. Fixed stainless steel bezel. Brushed grey dial with luminous silver-tone hands and index hour markers. Arabic numerals mark the 3, 6, 9 and 12 oclock positions.', 1, 1, 10);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (4, 'Seamaster Railmaster Автоматические мужские часы ', 'https://telegra.ph/file/6e2e52db0f550913b038c.png', 8253.0, 'Silver-tone stainless steel case with a silver-tone stainless steel oyster bracelet. Fixed domed silver-tone stainless steel bezel. Black dial with silver-tone Mercedes-logo, sword, and Breguet-style shape hands and stick with Arabic numerals at 3, 6, and 9 oclock positions hour markers.', 1, 4, 14);
+INSERT INTO products (id, name, imageUrl, price, description, categoryId, brandId, inStock) VALUES (9, 'Unisex Club De Nuit Untold EDP', 'https://telegra.ph/file/f5547d4bbfb74fc71402a.png', 119.0, 'Immerse yourself in the captivating allure of the Club De Nuit Untold EDP Spray, a remarkable addition to the esteemed Club De Nuit collection from the design house Armaf.', 4, 1, 45);
+
+
+
+
+
+
+--testnet
+
+INSERT INTO categories (id, name, "imageUrl") VALUES (1, 'Мужские часы', 'https://telegra.ph/file/3ca454e0919d167578e55.png');
+INSERT INTO categories (id, name, "imageUrl") VALUES (2, 'Женские часы', 'https://telegra.ph/file/be81ee0930e84fcc145dd.png');
+INSERT INTO categories (id, name, "imageUrl") VALUES (3, 'Очки', 'https://telegra.ph/file/18b364ac4ce779712f89e.png');
+INSERT INTO categories (id, name, "imageUrl") VALUES (4, 'Ароматы', 'https://telegra.ph/file/164c62f87036b70758ff0.png');
+INSERT INTO categories (id, name, "imageUrl") VALUES (5, 'Сумки', 'https://telegra.ph/file/25ef7641586eff8865c13.png');
+INSERT INTO categories (id, name, "imageUrl") VALUES (6, 'Обувь', 'https://telegra.ph/file/f2bb571532dd79b2a58eb.png');
+INSERT INTO categories (id, name, "imageUrl") VALUES (7, 'Одежда', 'https://telegra.ph/file/28d1700d01d45d6e23e05.png');
+INSERT INTO categories (id, name, "imageUrl") VALUES (8, 'Аксесуары', 'https://telegra.ph/file/a9a5d26b0eb8fe9f7c64b.png');
+INSERT INTO categories (id, name, "imageUrl") VALUES (9, 'Ювелирка', 'https://telegra.ph/file/8ad59f458f03be094fa80.png');
+INSERT INTO categories (id, name, "imageUrl") VALUES (10, 'Ручки', 'https://telegra.ph/file/346ea8434c392ac27a1c3.png');
+INSERT INTO categories (id, name, "imageUrl") VALUES (11, 'Поддержаные часы', 'https://telegra.ph/file/e7943ed810d92249d9d89.png');
+INSERT INTO categories (id, name, "imageUrl") VALUES (12, 'Скидки & акции', 'https://telegra.ph/file/c6df3e8871716f2ab9038.png');
+INSERT INTO brands (id, name) VALUES (1, 'omega');
+INSERT INTO brands (id, name) VALUES (2, 'gucci');
+INSERT INTO brands (id, name) VALUES (3, 'versace');
+INSERT INTO brands (id, name) VALUES (4, 'rolex');
+INSERT INTO brands (id, name) VALUES (5, 'burberry');
+INSERT INTO brands (id, name) VALUES (6, 'gucci');
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (5, 'HydroConquest Мужские автоматические часы с синим циферблатом ', 'https://telegra.ph/file/5ce2c0772419238d3357b.png', 3553.0, 'Stainless steel case with a stainless steel bracelet. Uni-directional rotating stainless steel bezel with a blue ceramic ring. Blue dial with luminous silver-tone hands and dot hour markers. Arabic numerals appear at the 6, 9 and 12 oclock positions.', 1, 3, 0);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (7, 'Essentials Quartz', 'https://telegra.ph/file/9446d0107c211d4a3543c.png', 13995.0, 'Yellow gold-tone stainless steel case with a black (croco-embossed) leather strap. Fixed yellow gold-tone stainless steel bezel. White dial with black hands and Roman numeral hour markers.', 2, 3, 0);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (8, 'Polarized Smoke Square Mens Sunglasses', 'https://telegra.ph/file/8dbfb88ef588ff5a22ab9.png', 70.0, 'Tom Ford Sunglasses. Series number: FT0956-D. Color code: 01D. Shape: Square. Lens Width: 52 mm. Lens Bridge: 21 mm. Arm Length: 145 mm.', 3, 5, 0);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (11, 'Black High-Top 100 Alce Belted Leather Sneaker', 'https://telegra.ph/file/f6eb516676a214e9d1098.png', 119.0, 'Buscemi Mens Sneakers. SKU: BCS22701 499. Color: Black/Black. Shoe Style: High Tops. Vamp Style: Lace-up. Upper Material: Leather.', 6, 3, 0);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (12, 'Crimson Ladies Greenwich Convertible Shoulder Bag', 'https://telegra.ph/file/001be09fd72d48257f9f6.png', 920.0, 'Michael Kors Ladies Shoulder Bag. SKU: 30H1GGRL6V-602. Barcode: 194900931028. Color: Crimson. Size: 25 x 15 x 8 cm. Michael Kors Crimson Ladies Greenwich Convertible Shoulder Bag - Crimson.', 5, 6, 0);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (13, 'Ladies Dark Brown Penberth Shearling Single-Breasted Coat', 'https://telegra.ph/file/a16a907614de0415fa9e6.png', 920.0, 'Burberry Ladies Outerwear. Fashion category: Coats & Jackets. SKU: 8030091. Color: Dark Brown. Burberry Ladies Dark Brown Penberth Shearling Single-Breasted Coat.', 7, 5, 0);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (14, 'Silver Engraved Heart Motif Trademark Bracelet', 'https://telegra.ph/file/a6a944885420d6cd8d08c.png', 1920.0, 'Gucci Ladies Bracelets. SKU: YBA223513001. Color: Silver-tone. Metal Type: Sterling Silver. Metal Stamp: 925-Sterling. Gem stone type: None. Bracelet style: 1 Band. Heart bracelet with Gucci trademark. Gucci Silver Engraved Heart Motif Trademark Bracelet.', 8, 2, 0);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (15, 'Ladies Pink Millenia Necklace', 'https://telegra.ph/file/1b7b4c6b37385cb965dca.png', 60.0, 'Swarovski Ladies Necklace. SKU: 5614933. Color: Pink. Metal Type: Rose Gold Plated. Gem stone type: Cubic Zirconia. Swarovski Ladies Pink Millenia Necklace.', 9, 3, 0);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (16, 'Gold Plated Ballpoint Pen and Cufflink Set', 'https://telegra.ph/file/b233e708b9624a5879ad5.png', 96.0, 'Picasso and Co gift set featuring a ballpoint pen in gold-plated brass and a pair of stainless steel cufflinks with a black enamel inlay. Nib Size: 0.5. Closed Length: 13.5cm.', 10, 1, 0);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (17, 'Datejust 36 Automatic Diamond Mens Watch', 'https://telegra.ph/file/eec06a94ec54342d90b9f.png', 965.0, 'Silver-tone stainless steel case with a two-tone (silver-tone and gold-tone) yellow gold/stainless steel jubilee bracelet. Fixed fluted yellow gold 18kt yellow gold bezel. Blue vignette dial with gold-tone hands and diamond hour markers. Minute markers around the outer rim. Dial Type: Analog.', 11, 5, 0);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (6, 'Мужские часы Tradition с автоматическим антрацитовым циферблатом', 'https://telegra.ph/file/6cef618b1a9273039bb01.png', 5243.0, 'Rose gold PVD stainless steel case with a brown leather strap. Fixed rose gold PVD bezel. Anthracite dial with rose gold-tone dauphine-style hands and index hour markers. A Roman numeral appears at the 12 oclock position.', 1, 2, 10);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (2, 'Очки солнцезащитные GG1372S 001 56', 'https://telegra.ph/file/4136cc155af7839331960.png', 13995.0, 'Gucci Sunglasses. Series number: GG1372S. Color code: 001. Shape: Square. Lens Width: 56 mm. Lens Bridge: 20 mm.', 3, 2, 14);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (3, 'Seamaster Railmaster Автоматические мужские часы ', 'https://telegra.ph/file/8128101f37595cb644c09.png', 317.0, 'Stainless steel case with a stainless steel bracelet. Fixed stainless steel bezel. Brushed grey dial with luminous silver-tone hands and index hour markers. Arabic numerals mark the 3, 6, 9 and 12 oclock positions.', 1, 1, 10);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (4, 'Seamaster Railmaster Автоматические мужские часы ', 'https://telegra.ph/file/6e2e52db0f550913b038c.png', 8253.0, 'Silver-tone stainless steel case with a silver-tone stainless steel oyster bracelet. Fixed domed silver-tone stainless steel bezel. Black dial with silver-tone Mercedes-logo, sword, and Breguet-style shape hands and stick with Arabic numerals at 3, 6, and 9 oclock positions hour markers.', 1, 4, 14);
+INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES (9, 'Unisex Club De Nuit Untold EDP', 'https://telegra.ph/file/f5547d4bbfb74fc71402a.png', 119.0, 'Immerse yourself in the captivating allure of the Club De Nuit Untold EDP Spray, a remarkable addition to the esteemed Club De Nuit collection from the design house Armaf.', 4, 1, 45);

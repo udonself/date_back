@@ -4,10 +4,11 @@ import math
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy import func, String
+from sqlalchemy import func, select, String
+from sqlalchemy import update
 from sqlalchemy.orm import aliased, Session
 from pydantic import BaseModel
 import requests
@@ -24,24 +25,76 @@ orders_router = APIRouter(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/orders/create')
 
 
-class OrderOut(BaseModel):
-    id: int
-    amountOfProducts: int
-    date: str
-    totalPrice: float
+@orders_router.get('/xlsx/sales/{start_date}/{end_date}')
+def get_sales(start_date: str, end_date: str, session: Session = Depends(depends_db)):
+
+    sold_products_subquery = session.query(
+        ProductOfCart.productId,
+        ProductOfCart.quantity
+    ).select_from(
+        ProductOfCart
+    ).join(
+        Cart, ProductOfCart.cartId == Cart.id
+    ).join(
+        Order, Cart.id == Order.cartId
+    ).filter(
+        Order.created >= start_date, Order.created <= end_date
+    ).subquery()
     
+    products = session.query(
+        Product.id,
+        Product.name,
+        Product.inStock,
+        func.coalesce(func.sum(sold_products_subquery.c.quantity), 0).label('TotalSold')
+    ).select_from(
+        Product
+    ).join(
+        sold_products_subquery,
+        sold_products_subquery.c.productId == Product.id,
+        isouter=True
+    ).group_by(
+        Product.id
+    ).order_by(
+        func.coalesce(func.sum(sold_products_subquery.c.quantity), 0).desc()
+    ).all()
+
+    # Выполнение запроса
+    for row in products:
+        print(row)
+        
+    workbook = xlsxwriter.Workbook('report.xlsx')
+    worksheet = workbook.add_worksheet()
     
-@orders_router.get('/xlsx_report')
-def get_report(session: Session = Depends(depends_db)):
+    headers = ['Айди товара', 'Название', 'В наличии', f'Продано в период с {start_date} по {end_date}']
+    for col, header in enumerate(headers):
+        worksheet.write(0, col, header)
+        
+    for row, row_data in enumerate(products, start=1):
+        for col, cell_data in enumerate(row_data):
+            worksheet.write(row, col, cell_data)
+    
+    worksheet.autofit()
+    
+    workbook.close()
+    
+    current_date = datetime.now()
+    formatted_date = current_date.strftime("%d-%m-%Y")
+    
+    return FileResponse('report.xlsx', filename=f"report_{formatted_date}.xlsx", media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    
+
+@orders_router.get('/xlsx/orders/{start_date}/{end_date}')
+def get_orders(start_date: str, end_date: str, session: Session = Depends(depends_db)):
     
     query = session.query(
         Order.id,
         User.id.label('user_id'),
-        User.username.label('user_username'),
+        # User.username.label('user_username'),
         func.cast(Order.created, String),
         (func.concat('г. ', Order.city, ', ул. ', Order.street, ', д. ', func.cast(Order.house, String), ', кв. ', func.cast(Order.apartment, String))).label('address'),
         func.string_agg(Product.name + ' (x' + func.cast(ProductOfCart.quantity, String) + ')', ', ').label('products'),
         func.sum(Product.price * ProductOfCart.quantity).label('total_price')) \
+    .filter(Order.created >= start_date, Order.created <= end_date) \
     .join(Cart, Order.cartId == Cart.id) \
     .join(User, Cart.userId == User.id) \
     .join(ProductOfCart, ProductOfCart.cartId == Cart.id) \
@@ -54,7 +107,7 @@ def get_report(session: Session = Depends(depends_db)):
     workbook = xlsxwriter.Workbook('report.xlsx')
     worksheet = workbook.add_worksheet()
     
-    headers = ['order_id', 'user_id', 'user_username', 'order_created', 'address', 'products', 'total_price']
+    headers = ['Айди заказа', 'Айди пользователя', 'Дата', 'Адрес', 'Товары', 'Итоговая цена']
     for col, header in enumerate(headers):
         worksheet.write(0, col, header)
         
@@ -72,6 +125,45 @@ def get_report(session: Session = Depends(depends_db)):
     return FileResponse('report.xlsx', filename=f"report_{formatted_date}.xlsx", media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     
 
+class DataToChangeStatus(BaseModel):
+    order_id: int
+    status: str
+
+
+@orders_router.post('/change_status')
+def change_order_status(data: DataToChangeStatus, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+    
+    user = get_user_by_token(token, session)
+    
+    if str(user.id) not in os.getenv('ADMIN_ID_LIST').split(","):
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    order = session.query(
+        Order
+    ).filter(
+        Order.id == data.order_id
+    ).first()
+    
+    if not order:
+        raise HTTPException(status_code=404, detail="Заказа с таким id нет!")
+
+    order.status = data.status
+    
+    session.commit()
+    
+    return {
+        "detail":"Статус заказа был успешно изменен!"
+    }
+    
+
+class OrderOut(BaseModel):
+    id: int
+    amountOfProducts: int
+    date: str
+    totalPrice: float
+    status: str
+    
+    
 @orders_router.get('/get', response_model=List[OrderOut])
 def get_orders(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     
@@ -81,7 +173,8 @@ def get_orders(token: str = Depends(oauth2_scheme), session: Session = Depends(d
         Order.id,
         func.sum(ProductOfCart.quantity).label('amountOfProducts'),
         Order.created.label('date'),
-        func.sum(Product.price * ProductOfCart.quantity).label('totalPrice')
+        func.sum(Product.price * ProductOfCart.quantity).label('totalPrice'),
+        Order.status
     ).select_from(
         Order
     ).join(
@@ -97,6 +190,8 @@ def get_orders(token: str = Depends(oauth2_scheme), session: Session = Depends(d
         Product.id == ProductOfCart.productId
     ).group_by(
         Order.id
+    ).order_by(
+        Order.created.desc()
     ).all()
     
     return [
@@ -104,8 +199,9 @@ def get_orders(token: str = Depends(oauth2_scheme), session: Session = Depends(d
             id=id,
             amountOfProducts=amountOfProducts,
             date=date.strftime('%d-%m-%Y'),
-            totalPrice=totalPrice if totalPrice < 100 else math.floor(totalPrice - totalPrice * 0.1)
-        ) for (id, amountOfProducts, date, totalPrice) in orders
+            totalPrice=totalPrice if totalPrice < 100 else math.floor(totalPrice - totalPrice * 0.1),
+            status=status
+        ) for (id, amountOfProducts, date, totalPrice, status) in orders
     ]
 
 
@@ -221,6 +317,27 @@ def add_to_cart(order_data: OrderData, token: str = Depends(oauth2_scheme), sess
     ).filter(
         ProductOfCart.cartId == order.cartId
     ).all()
+    
+    ###
+    # удаляем наличие заказанного товара
+    products_of_order_subquery = session.query(
+        ProductOfCart.productId,
+        func.sum(ProductOfCart.quantity).label('total_quantity')
+    ).filter(
+        ProductOfCart.cartId == order.cartId
+    ).group_by(
+        ProductOfCart.productId
+    ).subquery()
+
+    # Обновляем количество товаров в наличии для каждого продукта
+    stmt = update(Product).\
+        values(inStock=Product.inStock - products_of_order_subquery.c.total_quantity).\
+        where(Product.id == products_of_order_subquery.c.productId)
+
+    session.execute(stmt)
+    session.commit()
+    ###
+        
     
     total_price = session.query(
         func.sum(ProductOfCart.quantity * Product.price)

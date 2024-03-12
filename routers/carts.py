@@ -7,8 +7,8 @@ from sqlalchemy import func
 from sqlalchemy.orm import aliased, Session
 from pydantic import BaseModel
 
-from db import depends_db, User, Product, Cart, ProductOfCart, CartProductOut
-from helpers import get_user_by_token
+from db import depends_db, User, Product, Cart, ProductOfCart, CartProductOut, Category, Brand
+from helpers import get_user_by_token, getAmountOfCartItem
 
 
 carts_router = APIRouter(
@@ -18,31 +18,62 @@ carts_router = APIRouter(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/carts/add')
 
 
+# @carts_router.get("/pis")
+# def test(session: Session = Depends(depends_db)):
+#     categories = session.query(
+#         Category
+#     ).all()
+#     for c in categories:
+#         print(f"""INSERT INTO categories (id, name, "imageUrl") VALUES ({c.id}, '{c.name}', '{c.imageUrl}');""")
+    
+#     brands = session.query(
+#         Brand
+#     ).all()
+#     for b in brands:
+#         print(f"INSERT INTO brands (id, name) VALUES ({b.id}, '{b.name}');")
+    
+#     products = session.query(
+#         Product
+#     ).all()
+#     for p in products:
+#         print(f"""INSERT INTO products (id, name, "imageUrl", price, description, "categoryId", "brandId", "inStock") VALUES ({p.id}, '{p.name}', '{p.imageUrl}', {p.price}, '{p.description}', {p.categoryId}, {p.brandId}, {p.inStock});""")
+
+
 @carts_router.get("/amountOfItems")
-def get_amount_of_cart_items(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+def get_amount_if_cart_items(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+    
+    user = get_user_by_token(token, session)
+
+    return getAmountOfCartItem(user, session)
+
+
+@carts_router.get("/cartAmount/{product_id}")
+def get_amount_if_product_in_cart(product_id: int, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     
     user = get_user_by_token(token, session)
     
-    cart = session.query(
-        Cart
+    cart_subquery = session.query(
+        Cart.id.label('cart_id')
     ).filter(
-        Cart.userId == user.id,
-        Cart.active == True
-    ).first()
-    
-    if not cart:
-        return 0
+        Cart.active == True,
+        Cart.userId == user.id
+    ).subquery()
     
     amount = session.query(
-        func.sum(ProductOfCart.quantity).label('total_items')
-    ).select_from(
-        ProductOfCart
+        ProductOfCart.quantity
     ).filter(
-        ProductOfCart.cartId == cart.id
+        ProductOfCart.productId == product_id,
+        ProductOfCart.cartId == cart_subquery.c.cart_id
     ).scalar()
     
-    return amount
+    if not amount:
+        amount = 0
+    
+    return {
+        'amount': amount
+    }
 
+    
 
 @carts_router.get("/get", response_model=List[CartProductOut])
 def get_cart(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
@@ -90,7 +121,7 @@ class ProductToAdd(BaseModel):
 
 @carts_router.post("/add")
 def add_to_cart(product_to_add: ProductToAdd, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
-    
+
     user = get_user_by_token(token, session)
     
     # получаем корзину
@@ -131,7 +162,13 @@ def add_to_cart(product_to_add: ProductToAdd, token: str = Depends(oauth2_scheme
     
     # если этот товар еще не в корзине, то создаем запись с его содержанием
     if not product_of_cart:
+        if product.inStock == 0:
+        #     session.delete(product_of_cart)
+        #     session.commit()
+            raise HTTPException(status_code=404, detail={'message': 'В наличии нет столько товара!', 'new_quantity': 0})
         if product_to_add.quantity > 0:
+            # if product_to_add.quantity > product.inStock:
+            #     raise HTTPException(status_code=404, detail="В наличии нет столько товара!")
             product_of_cart = ProductOfCart(
                 cartId = cart.id,
                 productId = product.id,
@@ -139,20 +176,32 @@ def add_to_cart(product_to_add: ProductToAdd, token: str = Depends(oauth2_scheme
             )
             session.add(product_of_cart)
             session.commit()
-            return {'new_quantity': product_to_add.quantity}
+            cart_items_amount = getAmountOfCartItem(user, session)
+            return {'new_quantity': product_to_add.quantity, 'total_items': cart_items_amount}
         else:
-            return {'new_quantity': 0}
+            cart_items_amount = getAmountOfCartItem(user, session)
+            return {'new_quantity': 0, 'total_items': cart_items_amount}
     
-    else:
+    else: # если товар уже есть в корзине
         if (product_of_cart.quantity + product_to_add.quantity) > 0:
+            if (product_of_cart.quantity + product_to_add.quantity) > product.inStock:
+                if product.inStock == 0:
+                    session.delete(product_of_cart)
+                    session.commit()
+                elif product_of_cart.quantity >= product.inStock:
+                    product_of_cart.quantity = product.inStock
+                    session.commit()
+                raise HTTPException(status_code=404, detail={'message': 'В наличии нет столько товара!', 'new_quantity': product_of_cart.quantity})
             product_of_cart.quantity += product_to_add.quantity
             session.commit()
-            return {'new_quantity': product_of_cart.quantity}
+            cart_items_amount = getAmountOfCartItem(user, session)
+            return {'new_quantity': product_of_cart.quantity, 'total_items': cart_items_amount}
         else:
             session.delete(product_of_cart)
             session.commit()
     
-    return {'new_quantity': 0}
+    cart_items_amount = getAmountOfCartItem(user, session)
+    return {'new_quantity': 0, 'total_items': cart_items_amount}
     
     
     

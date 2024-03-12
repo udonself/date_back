@@ -1,3 +1,4 @@
+import os
 from typing import List
 from math import ceil
 import base64
@@ -6,16 +7,27 @@ from fastapi import APIRouter, HTTPException
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import func, JSON, literal
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, Session
 import requests
 
 from security import hash_password, encode_jwt, decode_jwt, check_password
 from db import depends_db, User, UserRegister
-from helpers import get_user_by_token
+from helpers import get_user_by_token, getAmountOfCartItem
 
 
 users_router = APIRouter(tags=['User'])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/users/me')
+
+
+@users_router.get("/users/isadmin")
+def user_auth(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+    
+    user = get_user_by_token(token, session)
+    
+    return {
+        'admin': str(user.id) in os.getenv('ADMIN_ID_LIST').split(",")
+    }
+    
 
 
 @users_router.post("/users/register")
@@ -41,7 +53,7 @@ def user_auth(username: str, password: str, session = Depends(depends_db)):
     if not check_password(password, existing_user.hashed_password):
         raise HTTPException(status_code=401, detail="Неправильный логин или пароль")
     token = encode_jwt({'id': existing_user.id})
-    return {'token': token}
+    return {'token': token, 'total_items': getAmountOfCartItem(existing_user, session)}
 
 
 # @users_router.get("/users/me")
