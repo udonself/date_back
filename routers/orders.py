@@ -63,7 +63,7 @@ def get_sales(start_date: str, end_date: str, session: Session = Depends(depends
     workbook, worksheet = prepare_workbook(
         report_number=random.randint(10000, 99999),
         title=f'Количество продаж и остаток с {start_date} по {end_date}',
-        headers=['Товар', 'В наличии', f'Продано в период с {start_date} по {end_date}'],
+        headers=['Товар', 'В наличии', f'Продано'],
         data=products
     )
     workbook.close()
