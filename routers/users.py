@@ -1,7 +1,10 @@
+import base64
+
 from fastapi import APIRouter, HTTPException
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+import requests
 
 from security import hash_password, encode_jwt, decode_jwt, check_password
 from db import depends_db, User, UserRegister, UserUpdate
@@ -54,10 +57,14 @@ def user_auth(username: str, password: str, session: Session = Depends(depends_d
 def update_info(data: UserUpdate, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     user = get_user_by_token(token, session)
     
+    base64avatar = data.avatar
+    response = requests.post('https://telegra.ph/upload', files = {"file": ('image.jpg', base64.b64decode(base64avatar), 'image/jpeg')})
+    telegraph_url = 'https://telegra.ph' + response.json()[0]['src']
+    
     # update user info
     user.age = data.age
     user.city = data.city
-    user.avatar = data.avatar
+    user.avatar = telegraph_url
     user.isMale = data.isMale
     user.firstName = data.firstName
     user.lastName = data.lastName
