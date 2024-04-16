@@ -24,7 +24,9 @@ def get_user_payload(user: User) -> dict:
         'city': user.city,
         'age': user.age,
         'isMale': user.isMale,
-        'avatar': user.avatar
+        'avatar': user.avatar,
+        'firstName': user.firstName,
+        'lastName': user.lastName
     }
     
     
