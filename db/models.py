@@ -15,20 +15,25 @@ class User(Base):
     username = Column(String)
     password = Column(String)
     firstName = Column(String)
-    lastName = Column(String)
-    city = Column(String)
     age = Column(Integer)
-    isMale = Column(Boolean)
-    avatar = Column(String)
-    photos = relationship('Photo', backref='user')
+    avatar = Column(String, default='https://telegra.ph/file/d06a5bd7749a4fcff76b0.png')
+    description = Column(String)
+    blocked = Column(Boolean, default=False)
+    
 
-
-class Photo(Base):
-    __tablename__ = 'photos'
-
+class Category(Base):
+    __tablename__ = 'categories'
+    
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
-    photo_url = Column(String)
+    name = Column(String)
+    
+    
+class CategoryOfUser(Base):
+    __tablename__ = 'categories_of_users'
+    
+    id = Column(Integer, primary_key=True)
+    userId = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
+    categoryId = Column(Integer, ForeignKey(f'{Category.__tablename__}.id'))
 
 
 class Like(Base):
