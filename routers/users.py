@@ -21,12 +21,9 @@ def get_user_payload(user: User) -> dict:
     return {
         'id': user.id,
         'username': user.username,
-        'city': user.city,
-        'age': user.age,
-        'isMale': user.isMale,
         'avatar': user.avatar,
         'firstName': user.firstName,
-        'lastName': user.lastName
+        'description': user.description
     }
     
     

@@ -15,7 +15,6 @@ class User(Base):
     username = Column(String)
     password = Column(String)
     firstName = Column(String)
-    age = Column(Integer)
     avatar = Column(String, default='https://telegra.ph/file/d06a5bd7749a4fcff76b0.png')
     description = Column(String)
     blocked = Column(Boolean, default=False)
