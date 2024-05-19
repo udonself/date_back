@@ -1,0 +1,48 @@
+
+@users_router.get("/test")
+def user_auth(session: Session = Depends(depends_db)):
+    # user_id = 1  # замените на нужный user_id
+    # user_with_categories = session.query(User).options(joinedload(User.categories)).filter(User.id == user_id).one()
+    # return user_with_categories
+    
+    
+    categories_data = [
+        {'id': 1, 'name': 'Музыка',},
+        {'id': 2, 'name': 'Путешествия',},
+        {'id': 3, 'name': 'Спорт', },
+        {'id': 4, 'name': 'Кино',},
+        {'id': 5, 'name': 'Чтение', },
+        {'id': 6, 'name': 'Искусство',},
+        {'id': 7, 'name': 'Фотография',},
+        {'id': 8, 'name': 'Игры',},
+        {'id': 9, 'name': 'Наука',},
+        {'id': 10, 'name': 'Технологии',},
+        {'id': 11, 'name': 'Мода',},
+        {'id': 12, 'name': 'Здоровье',},
+        {'id': 13, 'name': 'Фантастика',},
+        {'id': 14, 'name': 'История',},
+        {'id': 15, 'name': 'Комедия',},
+        {'id': 16, 'name': 'Астрономия',},
+        {'id': 17, 'name': 'Философия',},
+        {'id': 18, 'name': 'Программирование',},
+        {'id': 19, 'name': 'Аниме',},
+        {'id': 20, 'name': 'Комиксы',},
+        {'id': 21, 'name': 'Мемы',},
+        {'id': 22, 'name': 'Подкасты',},
+        {'id': 23, 'name': 'Сериалы',},
+        {'id': 24, 'name': 'Блоги',},
+        {'id': 25, 'name': 'Стихи',},
+        {'id': 26, 'name': 'Фильмы',},
+        {'id': 27, 'name': 'Языки',},
+        {'id': 28, 'name': 'Форумы',},
+        {'id': 29, 'name': 'Психология',},
+        {'id': 30, 'name': 'Медитация'}
+    ]
+
+    # Вставка данных
+    for category_data in categories_data:
+        category = Category(**category_data)
+        session.add(category)
+
+    # Коммит изменений
+    session.commit()

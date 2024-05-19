@@ -7,12 +7,11 @@ class UserRegister(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    city: str
-    age: int
-    isMale: bool
-    avatar: str
-    firstName: str
-    lastName: str
+    age: int | None
+    avatar: str | None
+    firstName: str | None
+    description: str | None
+    categories: list | None
     
     
 

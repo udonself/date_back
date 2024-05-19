@@ -15,9 +15,11 @@ class User(Base):
     username = Column(String)
     password = Column(String)
     firstName = Column(String)
+    age = Column(Integer)
     avatar = Column(String, default='https://telegra.ph/file/d06a5bd7749a4fcff76b0.png')
     description = Column(String)
     blocked = Column(Boolean, default=False)
+    categories = relationship('Category', secondary='categories_of_users', back_populates='users')
     
 
 class Category(Base):
@@ -25,6 +27,7 @@ class Category(Base):
     
     id = Column(Integer, primary_key=True)
     name = Column(String)
+    users = relationship('User', secondary='categories_of_users', back_populates='categories')
     
     
 class CategoryOfUser(Base):
