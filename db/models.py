@@ -55,15 +55,6 @@ class Dislike(Base):
     receiver_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
 
 
-class Match(Base):
-    __tablename__ = 'matches'
-
-    id = Column(Integer, primary_key=True)
-    user1_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
-    user2_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
-    matched_at = Column(DateTime, default=datetime.now)
-
-
 class Message(Base):
     __tablename__ = 'messages'
 

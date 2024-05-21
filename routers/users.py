@@ -1,13 +1,15 @@
 import base64
+from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func
 import requests
 
 from security import hash_password, encode_jwt, decode_jwt, check_password
-from db import depends_db, User, UserRegister, UserUpdate, Category, CategoryOfUser
+from db import depends_db, User, UserRegister, UserUpdate, Category, CategoryOfUser, Like, Dislike
 from helpers import get_user_by_token
 
 
@@ -80,6 +82,107 @@ def user_auth(username: str, password: str, session: Session = Depends(depends_d
 #     user = get_user_by_token(token, session)
     
 #     return {'ok': True, 'token': encode_jwt(get_user_payload(user))}
+
+
+@users_router.get("/find")
+def find_user(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+    user = get_user_by_token(token, session)
+    
+    liked_disliked_user_ids = session.query(Like.receiver_id).filter(Like.sender_id == user.id).union(
+        session.query(Dislike.receiver_id).filter(Dislike.sender_id == user.id)
+    ).all()
+
+    # Получить списки пользователей, которые лайкнули или дизлайкнули нас
+    liked_disliked_by_user_ids = session.query(Like.sender_id).filter(Like.receiver_id == user.id).union(
+        session.query(Dislike.sender_id).filter(Dislike.receiver_id == user.id)
+    ).all()
+
+    # Объединить все исключаемые user_id
+    excluded_user_ids = {id for (id,) in liked_disliked_user_ids + liked_disliked_by_user_ids}
+    
+    # Найти пользователей, у которых есть общие категории с текущим пользователем
+    potential_user = session.query(
+        User,
+        # func.count(Category.id).label('common_categories')
+    ).options(joinedload(User.categories)
+    ).join(CategoryOfUser, User.id == CategoryOfUser.userId
+    ).join(Category, CategoryOfUser.categoryId == Category.id
+    ).filter(
+        User.id != user.id,
+        User.id.notin_(excluded_user_ids)
+    ).group_by(User.id
+    ).order_by(func.count(Category.id).desc()
+    ).first()
+    
+    if not potential_user:
+        raise HTTPException(status_code=404, detail="No matching users found")
+
+    u = potential_user
+    return {
+        'id': u.id,
+        'firstName': u.firstName,
+        'age': u.age,
+        'avatar': u.avatar,
+        'description': u.description,
+        'categories': u.categories
+    }
+    
+
+@users_router.post("/like/{receiver_id}")
+def like_user(receiver_id: int, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+    try:
+        sender = get_user_by_token(token, session)
+        receiver = session.query(User).filter(User.id == receiver_id).first()
+        if not sender or not receiver:
+            raise HTTPException(status_code=404, detail="Sender or receiver not found")
+
+        like = Like(sender_id=sender.id, receiver_id=receiver.id, liked_at=datetime.now())
+        session.add(like)
+        session.commit()
+        return {"message": "User liked successfully"}
+
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
+
+
+@users_router.post("/dislike/{receiver_id}")
+def dislike_user(receiver_id: int, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+    try:
+        sender = get_user_by_token(token, session)
+        receiver = session.query(User).filter(User.id == receiver_id).first()
+        if not sender or not receiver:
+            raise HTTPException(status_code=404, detail="Sender or receiver not found")
+
+        dislike = Dislike(sender_id=sender.id, receiver_id=receiver.id, disliked_at=datetime.now())
+        session.add(dislike)
+        session.commit()
+        return {"message": "User disliked successfully"}
+
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
+
+
+@users_router.get("/interactions")
+def get_interactions(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+    user = get_user_by_token(token, session)
+    
+    # matches = session.query(
+    #     User
+    # ).
+    
+    # Найти пользователей, которых мы лайкнули и они лайкнули нас
+    matches = session.query(User).join(Like, Like.sender_id == User.id).filter(
+        Like.receiver_id == user.id, User.id == Like.sender_id
+    ).all()
+
+    # Найти пользователей, которые лайкнули текущего пользователя
+    likes = session.query(User).join(Like, Like.sender_id == User.id).filter(
+        Like.receiver_id == user.id
+    ).all()
+
+    return {"likes": likes, "matches": matches}
 
 
 @users_router.post("/update")
