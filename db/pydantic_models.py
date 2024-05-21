@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel
 
 
@@ -7,11 +9,11 @@ class UserRegister(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    age: int | None
-    avatar: str | None
-    firstName: str | None
-    description: str | None
-    categories: list | None
+    age: int
+    avatar: str
+    firstName: str
+    description: str
+    categories: List[int]
     
     
 

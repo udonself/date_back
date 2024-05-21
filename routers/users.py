@@ -97,6 +97,12 @@ def update_info(data: UserUpdate, token: str = Depends(oauth2_scheme), session: 
     user.age = data.age
     user.avatar = telegraph_url
     user.firstName = data.firstName
+    user.description = data.description
+    
+    user.categories.clear()
+    categories_to_add = session.query(Category).filter(Category.id.in_(data.categories)).all()
+    user.categories.extend(categories_to_add)
+
     session.commit()
     
     return {'ok': True, 'token': encode_jwt(get_user_payload(user))}
