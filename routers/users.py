@@ -139,7 +139,7 @@ def like_user(receiver_id: int, token: str = Depends(oauth2_scheme), session: Se
         like = Like(sender_id=sender.id, receiver_id=receiver.id, liked_at=datetime.now())
         session.add(like)
         session.commit()
-        return {"message": "User liked successfully"}
+        return find_user(token, session)
 
     except Exception as e:
         session.rollback()
