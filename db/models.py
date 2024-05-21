@@ -59,7 +59,7 @@ class Message(Base):
     __tablename__ = 'messages'
 
     id = Column(Integer, primary_key=True)
-    match_id = Column(Integer, ForeignKey(f'{Match.__tablename__}.id'))
+    # match_id = Column(Integer, ForeignKey(f'{Match.__tablename__}.id'))
     sender_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
     receiver_id = Column(Integer, ForeignKey(f'{User.__tablename__}.id'))
     message_text = Column(String)
