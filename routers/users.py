@@ -154,7 +154,7 @@ def dislike_user(receiver_id: int, token: str = Depends(oauth2_scheme), session:
         if not sender or not receiver:
             raise HTTPException(status_code=404, detail="Sender or receiver not found")
 
-        dislike = Dislike(sender_id=sender.id, receiver_id=receiver.id, disliked_at=datetime.now())
+        dislike = Dislike(sender_id=sender.id, receiver_id=receiver.id)
         session.add(dislike)
         session.commit()
         return find_user(token, session)
