@@ -157,7 +157,7 @@ def dislike_user(receiver_id: int, token: str = Depends(oauth2_scheme), session:
         dislike = Dislike(sender_id=sender.id, receiver_id=receiver.id, disliked_at=datetime.now())
         session.add(dislike)
         session.commit()
-        return {"message": "User disliked successfully"}
+        return find_user(token, session)
 
     except Exception as e:
         session.rollback()

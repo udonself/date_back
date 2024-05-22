@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from pydantic import BaseModel
 
@@ -14,6 +14,30 @@ class UserUpdate(BaseModel):
     firstName: str
     description: str
     categories: List[int]
+
+
+class MessageToSend(BaseModel):
+    to_id: int
+    content: str
+    
+
+class MessageOut(BaseModel):
+    from_id: int
+    content: str
+    hour: int
+    minute: int
+
+
+class ConversationOut(BaseModel):
+    messages_grouped_by_date: Dict[str, List[MessageOut]]
+
+
+class ConversationInfo(BaseModel):
+    companion_id: int | None
+    companion_username: str | None
+    companion_avatar: str | None
+    last_message: str | None
+    last_date: str | None
     
     
 

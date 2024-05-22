@@ -14,7 +14,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String)
     password = Column(String)
-    firstName = Column(String)
+    firstName = Column( String)
     age = Column(Integer)
     avatar = Column(String, default='https://telegra.ph/file/d06a5bd7749a4fcff76b0.png')
     description = Column(String)
