@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import func, or_, and_, String, text
 
-from db import depends_db, User, Message, MessageToSend, ConversationOut, MessageOut, ConversationInfo
+from db import depends_db, User, Message, MessageToSend, ConversationOut, MessageOut, ConversationInfo, ConversationOut, ConversationOutMessages
 from helpers import get_user_by_token
 
 
@@ -54,17 +54,25 @@ def get_messages(companion_id: int , token: str = Depends(oauth2_scheme), sessio
         ).label('message_array')
     ).select_from(subq).group_by(func.date(subq.c.sent_at)).order_by('date').all()
     
+    companion = session.query(
+        User
+    ).filter(
+        User.id == companion_id
+    ).first()
+    
     
     messages_grouped_by_date = {}
     
     for (date, messages) in result:
         messages_grouped_by_date[date] = [MessageOut(from_id=msg['from_id'], content=msg['content'], hour=msg['hour'], minute=msg['minute']) for msg in messages]
     
-    conversation = ConversationOut(
-        messages_grouped_by_date = messages_grouped_by_date
+    return ConversationOut(
+        name=companion.firstName,
+        avatar=companion.avatar,
+        messages=ConversationOutMessages(
+            messages_grouped_by_date = messages_grouped_by_date
+        )
     )
-
-    return conversation
 
 
 

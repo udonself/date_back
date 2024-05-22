@@ -28,8 +28,14 @@ class MessageOut(BaseModel):
     minute: int
 
 
-class ConversationOut(BaseModel):
+class ConversationOutMessages(BaseModel):
     messages_grouped_by_date: Dict[str, List[MessageOut]]
+
+
+class ConversationOut(BaseModel):
+    name: str
+    avatar: str
+    messages: ConversationOutMessages
 
 
 class ConversationInfo(BaseModel):
