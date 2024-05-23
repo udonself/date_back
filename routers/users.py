@@ -130,23 +130,6 @@ def find_user(token: str = Depends(oauth2_scheme), session: Session = Depends(de
         .order_by(matching_categories_subquery.c.matching_categories.desc().nullslast(), User.id)
         .first()
     )
-    
-    # print(potential_user)
-    
-    # potential_user = session.query(
-    #     User
-    # ).options(joinedload(User.categories)
-    # ).join(CategoryOfUser, User.id == CategoryOfUser.userId
-    # ).join(Category, CategoryOfUser.categoryId == Category.id
-    # ).filter(
-    #     User.id != user.id,
-    #     User.id.notin_(excluded_user_ids)
-    # ).group_by(User.id
-    # ).order_by(func.count(Category.id).desc()
-    # ).first()
-    
-    # if not potential_user:
-    #     raise HTTPException(status_code=404, detail="No matching users found")
 
     u, count = potential_user
     return {
@@ -198,22 +181,75 @@ def dislike_user(receiver_id: int, token: str = Depends(oauth2_scheme), session:
 @users_router.get("/interactions")
 def get_interactions(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     user = get_user_by_token(token, session)
-    
-    # matches = session.query(
-    #     User
-    # ).
-    
-    # Найти пользователей, которых мы лайкнули и они лайкнули нас
-    matches = session.query(User).join(Like, Like.sender_id == User.id).filter(
-        Like.receiver_id == user.id, User.id == Like.sender_id
-    ).all()
 
-    # Найти пользователей, которые лайкнули текущего пользователя
-    likes = session.query(User).join(Like, Like.sender_id == User.id).filter(
-        Like.receiver_id == user.id
-    ).all()
+    # Подзапрос для поиска пользователей, которые лайкнули текущего пользователя
+    likes_subquery = (
+        session.query(Like.sender_id)
+        .filter(Like.receiver_id == user.id)
+        .subquery()
+    )
 
-    return {"likes": likes, "matches": matches}
+    # Подзапрос для поиска пользователей, которые текущий пользователь дизлайкнул
+    dislikes_subquery = (
+        session.query(Dislike.receiver_id)
+        .filter(Dislike.sender_id == user.id)
+        .subquery()
+    )
+
+    # Поиск совпадений (matches)
+    matches = (
+        session.query(User)
+        .join(Like, Like.receiver_id == User.id)
+        .filter(
+            Like.sender_id == user.id,
+            User.id.in_(likes_subquery),
+            User.id.notin_(dislikes_subquery)
+        )
+        .all()
+    )
+
+    # Извлечь IDs пользователей, которые уже являются совпадениями
+    match_ids = {user.id for user in matches}
+
+    # Поиск пользователей, которые лайкнули текущего пользователя, но не были им дизлайкнуты и не являются совпадениями
+    likes = (
+        session.query(User)
+        .filter(
+            User.id.in_(likes_subquery),
+            User.id.notin_(dislikes_subquery),
+            User.id.notin_(match_ids)
+        )
+        .all()
+    )
+
+    # Формирование списка likes
+    likes_list = [
+        {
+            'id': u.id,
+            'username': u.username,
+            'firstName': u.firstName,
+            'age': u.age,
+            'avatar': u.avatar,
+            'description': u.description
+        } for u in likes
+    ]
+
+    # Формирование списка matches
+    matches_list = [
+        {
+            'id': u.id,
+            'username': u.username,
+            'firstName': u.firstName,
+            'age': u.age,
+            'avatar': u.avatar,
+            'description': u.description
+        } for u in matches
+    ]
+
+    return {
+        'likes': likes_list,
+        'matches': matches_list
+    }
 
 
 @users_router.post("/update")
