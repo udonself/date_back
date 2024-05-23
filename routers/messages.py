@@ -25,7 +25,7 @@ def send_message(message_data: MessageToSend, token: str = Depends(oauth2_scheme
     )
     session.add(new_message)
     session.commit()
-    return new_message
+    return get_messages(message_data.to_id, token, session)
 
 
 @messages_router.get('/get', response_model=ConversationOut)
