@@ -198,7 +198,7 @@ def get_interactions(token: str = Depends(oauth2_scheme), session: Session = Dep
 
     # Поиск совпадений (matches)
     matches = (
-        session.query(User)
+        session.query(User).options(joinedload(User.categories))
         .join(Like, Like.receiver_id == User.id)
         .filter(
             Like.sender_id == user.id,
@@ -226,11 +226,11 @@ def get_interactions(token: str = Depends(oauth2_scheme), session: Session = Dep
     likes_list = [
         {
             'id': u.id,
-            'username': u.username,
             'firstName': u.firstName,
             'age': u.age,
             'avatar': u.avatar,
-            'description': u.description
+            'description': u.description,
+            'categories': u.categories
         } for u in likes
     ]
 
@@ -238,11 +238,11 @@ def get_interactions(token: str = Depends(oauth2_scheme), session: Session = Dep
     matches_list = [
         {
             'id': u.id,
-            'username': u.username,
             'firstName': u.firstName,
             'age': u.age,
             'avatar': u.avatar,
-            'description': u.description
+            'description': u.description,
+            'categories': u.categories
         } for u in matches
     ]
 
