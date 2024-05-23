@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func
+from sqlalchemy import func, or_
 import requests
 
 from security import hash_password, encode_jwt, decode_jwt, check_password
@@ -77,13 +77,6 @@ def user_auth(username: str, password: str, session: Session = Depends(depends_d
     return {'token': token}
 
 
-# @users_router.get('/me')
-# def get_me(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
-#     user = get_user_by_token(token, session)
-    
-#     return {'ok': True, 'token': encode_jwt(get_user_payload(user))}
-
-
 @users_router.get("/find")
 def find_user(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     user = get_user_by_token(token, session)
@@ -92,18 +85,31 @@ def find_user(token: str = Depends(oauth2_scheme), session: Session = Depends(de
         session.query(Dislike.receiver_id).filter(Dislike.sender_id == user.id)
     ).all()
 
-    # Получить списки пользователей, которые лайкнули или дизлайкнули нас
     liked_disliked_by_user_ids = session.query(Like.sender_id).filter(Like.receiver_id == user.id).union(
         session.query(Dislike.sender_id).filter(Dislike.receiver_id == user.id)
     ).all()
+    
+    
+    subquery = session.query(CategoryOfUser.userId).filter(
+        CategoryOfUser.userId == User.id
+    ).exists()
+    unknown_user_ids = session.query(
+        User.id
+    ).filter(
+        or_(
+            User.avatar == 'https://telegra.ph/file/d06a5bd7749a4fcff76b0.png',
+            User.age == None,
+            User.firstName == None,
+            User.description == None,
+            ~subquery
+        )
+    ).all()
 
     # Объединить все исключаемые user_id
-    excluded_user_ids = {id for (id,) in liked_disliked_user_ids + liked_disliked_by_user_ids}
+    excluded_user_ids = {id for (id,) in liked_disliked_user_ids + liked_disliked_by_user_ids + unknown_user_ids}
     
-    # Найти пользователей, у которых есть общие категории с текущим пользователем
     potential_user = session.query(
-        User,
-        # func.count(Category.id).label('common_categories')
+        User
     ).options(joinedload(User.categories)
     ).join(CategoryOfUser, User.id == CategoryOfUser.userId
     ).join(Category, CategoryOfUser.categoryId == Category.id
