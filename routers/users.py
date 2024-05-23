@@ -143,7 +143,7 @@ def find_user(token: str = Depends(oauth2_scheme), session: Session = Depends(de
     
 
 @users_router.post("/like/{receiver_id}")
-def like_user(receiver_id: int, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+def like_user(receiver_id: int, token: str = Depends(oauth2_scheme), return_likes: bool = False, session: Session = Depends(depends_db)):
     try:
         sender = get_user_by_token(token, session)
         receiver = session.query(User).filter(User.id == receiver_id).first()
@@ -153,6 +153,8 @@ def like_user(receiver_id: int, token: str = Depends(oauth2_scheme), session: Se
         like = Like(sender_id=sender.id, receiver_id=receiver.id, liked_at=datetime.now())
         session.add(like)
         session.commit()
+        if return_likes:
+            return get_interactions(token, session)
         return find_user(token, session)
 
     except Exception as e:
@@ -161,7 +163,7 @@ def like_user(receiver_id: int, token: str = Depends(oauth2_scheme), session: Se
 
 
 @users_router.post("/dislike/{receiver_id}")
-def dislike_user(receiver_id: int, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+def dislike_user(receiver_id: int, token: str = Depends(oauth2_scheme), return_likes: bool = False, session: Session = Depends(depends_db)):
     try:
         sender = get_user_by_token(token, session)
         receiver = session.query(User).filter(User.id == receiver_id).first()
@@ -171,6 +173,8 @@ def dislike_user(receiver_id: int, token: str = Depends(oauth2_scheme), session:
         dislike = Dislike(sender_id=sender.id, receiver_id=receiver.id)
         session.add(dislike)
         session.commit()
+        if return_likes:
+            return get_interactions(token, session)
         return find_user(token, session)
 
     except Exception as e:
