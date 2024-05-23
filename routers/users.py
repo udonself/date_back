@@ -81,6 +81,22 @@ def user_auth(username: str, password: str, session: Session = Depends(depends_d
 def find_user(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     user = get_user_by_token(token, session)
     
+    user_categories_subquery = (
+        session.query(CategoryOfUser.categoryId)
+        .filter(CategoryOfUser.userId == user.id)
+        .subquery()
+    )  
+    
+    matching_categories_subquery = (
+        session.query(
+            CategoryOfUser.userId,
+            func.count(CategoryOfUser.categoryId).label('matching_categories')
+        )
+        .filter(CategoryOfUser.categoryId.in_(user_categories_subquery))
+        .group_by(CategoryOfUser.userId)
+        .subquery()
+    )
+
     liked_disliked_user_ids = session.query(Like.receiver_id).filter(Like.sender_id == user.id).union(
         session.query(Dislike.receiver_id).filter(Dislike.sender_id == user.id)
     ).all()
@@ -88,7 +104,6 @@ def find_user(token: str = Depends(oauth2_scheme), session: Session = Depends(de
     liked_disliked_by_user_ids = session.query(Like.sender_id).filter(Like.receiver_id == user.id).union(
         session.query(Dislike.sender_id).filter(Dislike.receiver_id == user.id)
     ).all()
-    
     
     subquery = session.query(CategoryOfUser.userId).filter(
         CategoryOfUser.userId == User.id
@@ -108,22 +123,32 @@ def find_user(token: str = Depends(oauth2_scheme), session: Session = Depends(de
     # Объединить все исключаемые user_id
     excluded_user_ids = {id for (id,) in liked_disliked_user_ids + liked_disliked_by_user_ids + unknown_user_ids}
     
-    potential_user = session.query(
-        User
-    ).options(joinedload(User.categories)
-    ).join(CategoryOfUser, User.id == CategoryOfUser.userId
-    ).join(Category, CategoryOfUser.categoryId == Category.id
-    ).filter(
-        User.id != user.id,
-        User.id.notin_(excluded_user_ids)
-    ).group_by(User.id
-    ).order_by(func.count(Category.id).desc()
-    ).first()
+    potential_user = (
+        session.query(User, matching_categories_subquery.c.matching_categories).options(joinedload(User.categories))
+        .filter(User.id != user.id, User.id.notin_(excluded_user_ids))
+        .outerjoin(matching_categories_subquery, User.id == matching_categories_subquery.c.userId)
+        .order_by(matching_categories_subquery.c.matching_categories.desc().nullslast(), User.id)
+        .first()
+    )
     
-    if not potential_user:
-        raise HTTPException(status_code=404, detail="No matching users found")
+    # print(potential_user)
+    
+    # potential_user = session.query(
+    #     User
+    # ).options(joinedload(User.categories)
+    # ).join(CategoryOfUser, User.id == CategoryOfUser.userId
+    # ).join(Category, CategoryOfUser.categoryId == Category.id
+    # ).filter(
+    #     User.id != user.id,
+    #     User.id.notin_(excluded_user_ids)
+    # ).group_by(User.id
+    # ).order_by(func.count(Category.id).desc()
+    # ).first()
+    
+    # if not potential_user:
+    #     raise HTTPException(status_code=404, detail="No matching users found")
 
-    u = potential_user
+    u, count = potential_user
     return {
         'id': u.id,
         'firstName': u.firstName,
