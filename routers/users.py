@@ -67,6 +67,21 @@ def user_auth(session: Session = Depends(depends_db)):
     # session.commit()
     
     # return {}
+
+
+@users_router.get("/all", response_model=List[UserInfo])
+def get_users(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+    admin = get_user_by_token(token, session)
+    if admin.id not in ADMIN_IDS:
+        raise HTTPException(status_code=401, detail="Нет доступа")
+    
+    users = session.query(
+        User
+    ).all()
+    
+    print(users)
+    
+    return users
     
     
 @users_router.post("/block/{user_id}", response_model=UserInfo)
@@ -79,11 +94,11 @@ def block_user(user_id: int, token: str = Depends(oauth2_scheme), session: Sessi
     user.blocked = True
     session.commit()
     
-    return user
+    return get_users(token, session)
 
 
 @users_router.post("/unblock/{user_id}", response_model=UserInfo)
-def block_user(user_id: int, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+def unblock_user(user_id: int, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     admin = get_user_by_token(token, session)
     if admin.id not in ADMIN_IDS:
         raise HTTPException(status_code=401, detail="Нет доступа")
@@ -92,22 +107,8 @@ def block_user(user_id: int, token: str = Depends(oauth2_scheme), session: Sessi
     user.blocked = False
     session.commit()
     
-    return user
+    return get_users(token, session)
 
-
-@users_router.get("/all", response_model=List[UserInfo])
-def block_user(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
-    admin = get_user_by_token(token, session)
-    if admin.id not in ADMIN_IDS:
-        raise HTTPException(status_code=401, detail="Нет доступа")
-    
-    users = session.query(
-        User
-    ).all()
-    
-    print(users)
-    
-    return users
     
 
 @users_router.get("/auth")
