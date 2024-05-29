@@ -77,6 +77,8 @@ def get_users(token: str = Depends(oauth2_scheme), session: Session = Depends(de
     
     users = session.query(
         User
+    ).order_by(
+        User.id
     ).all()
     
     print(users)
@@ -84,7 +86,7 @@ def get_users(token: str = Depends(oauth2_scheme), session: Session = Depends(de
     return users
     
     
-@users_router.post("/block/{user_id}", response_model=UserInfo)
+@users_router.post("/block/{user_id}", response_model=List[UserInfo])
 def block_user(user_id: int, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     admin = get_user_by_token(token, session)
     if admin.id not in ADMIN_IDS:
@@ -97,7 +99,7 @@ def block_user(user_id: int, token: str = Depends(oauth2_scheme), session: Sessi
     return get_users(token, session)
 
 
-@users_router.post("/unblock/{user_id}", response_model=UserInfo)
+@users_router.post("/unblock/{user_id}", response_model=List[UserInfo])
 def unblock_user(user_id: int, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     admin = get_user_by_token(token, session)
     if admin.id not in ADMIN_IDS:
