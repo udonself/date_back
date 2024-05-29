@@ -34,7 +34,8 @@ def get_user_payload(user: User) -> dict:
         'age': user.age,
         'categories': [
             {'id': c.id, 'name': c.name} for c in user.categories
-        ]
+        ],
+        'isAdmin': user.id in ADMIN_IDS
     }
     
     
