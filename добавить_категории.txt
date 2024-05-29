@@ -1,3 +1,25 @@
+delete from likes;
+delete from dislikes;
+
+select * from users;
+
+delete from dislikes where sender_id = 1;
+
+select * from dislikes;
+select * from likes;
+
+
+select * from categories;
+
+
+select u.id, u."firstName", array_agg(categories.name)
+from users u
+join categories_of_users on categories_of_users."userId"=u.id
+join categories on categories.id=categories_of_users."categoryId"
+group by u.id;
+
+
+
 
 @users_router.get("/test")
 def user_auth(session: Session = Depends(depends_db)):

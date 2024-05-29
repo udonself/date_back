@@ -1,3 +1,4 @@
+from typing import List
 import base64
 from datetime import datetime
 
@@ -9,7 +10,7 @@ from sqlalchemy import func, or_
 import requests
 
 from security import hash_password, encode_jwt, decode_jwt, check_password
-from db import depends_db, User, UserRegister, UserUpdate, Category, CategoryOfUser, Like, Dislike
+from db import depends_db, User, UserRegister, UserUpdate, Category, CategoryOfUser, Like, Dislike, UserInfo
 from helpers import get_user_by_token
 
 
@@ -18,6 +19,8 @@ users_router = APIRouter(
     prefix='/users'
 )
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/users/update')
+
+ADMIN_IDS = [1]
 
 
 def get_user_payload(user: User) -> dict:
@@ -64,7 +67,47 @@ def user_auth(session: Session = Depends(depends_db)):
     
     # return {}
     
+    
+@users_router.post("/block/{user_id}", response_model=UserInfo)
+def block_user(user_id: int, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+    admin = get_user_by_token(token, session)
+    if admin.id not in ADMIN_IDS:
+        raise HTTPException(status_code=401, detail="Нет доступа")
+    
+    user = session.query(User).filter(User.id == user_id).first()
+    user.blocked = True
+    session.commit()
+    
+    return user
 
+
+@users_router.post("/unblock/{user_id}", response_model=UserInfo)
+def block_user(user_id: int, token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+    admin = get_user_by_token(token, session)
+    if admin.id not in ADMIN_IDS:
+        raise HTTPException(status_code=401, detail="Нет доступа")
+    
+    user = session.query(User).filter(User.id == user_id).first()
+    user.blocked = False
+    session.commit()
+    
+    return user
+
+
+@users_router.get("/all", response_model=List[UserInfo])
+def block_user(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
+    admin = get_user_by_token(token, session)
+    if admin.id not in ADMIN_IDS:
+        raise HTTPException(status_code=401, detail="Нет доступа")
+    
+    users = session.query(
+        User
+    ).all()
+    
+    print(users)
+    
+    return users
+    
 
 @users_router.get("/auth")
 def user_auth(username: str, password: str, session: Session = Depends(depends_db)):
@@ -80,6 +123,9 @@ def user_auth(username: str, password: str, session: Session = Depends(depends_d
 @users_router.get("/find")
 def find_user(token: str = Depends(oauth2_scheme), session: Session = Depends(depends_db)):
     user = get_user_by_token(token, session)
+    
+    if user.blocked:
+        raise HTTPException(status_code=404, detail="Sender or receiver not found")
     
     user_categories_subquery = (
         session.query(CategoryOfUser.categoryId)
@@ -116,6 +162,7 @@ def find_user(token: str = Depends(oauth2_scheme), session: Session = Depends(de
             User.age == None,
             User.firstName == None,
             User.description == None,
+            User.blocked == True,
             ~subquery
         )
     ).all()

@@ -46,5 +46,14 @@ class ConversationInfo(BaseModel):
     last_date: str | None
     
     
+class UserInfo(BaseModel):
+    id: int
+    username: str | None
+    avatar: str
+    description: str | None
+    firstName: str | None
+    blocked: bool
+    
+    
 
     
