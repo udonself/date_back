@@ -50,6 +50,7 @@ class UserInfo(BaseModel):
     id: int
     username: str | None
     avatar: str
+    age: int | None
     description: str | None
     firstName: str | None
     blocked: bool
