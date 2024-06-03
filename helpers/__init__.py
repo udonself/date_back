@@ -1,1 +1,1 @@
-from .helpers import get_user_by_token
+from .helpers import get_user_by_token, notify_about_update

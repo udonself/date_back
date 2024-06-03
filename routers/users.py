@@ -1,3 +1,4 @@
+import os
 from typing import List
 import base64
 from datetime import datetime
@@ -8,10 +9,14 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, or_
 import requests
+from dotenv import load_dotenv
 
 from security import hash_password, encode_jwt, decode_jwt, check_password
 from db import depends_db, User, UserRegister, UserUpdate, Category, CategoryOfUser, Like, Dislike, UserInfo
-from helpers import get_user_by_token
+from helpers import get_user_by_token, notify_about_update
+
+
+load_dotenv()
 
 
 users_router = APIRouter(
@@ -52,21 +57,6 @@ def user_register(user: UserRegister, session: Session = Depends(depends_db)):
     session.commit()
     token = encode_jwt(get_user_payload(new_user))
     return {'token': token}
-
-
-@users_router.get("/test")
-def user_auth(session: Session = Depends(depends_db)):
-    user_id = 1 
-    user_with_categories = session.query(User).options(joinedload(User.categories)).filter(User.id == user_id).one()
-    return user_with_categories
-    
-    # category = session.query(Category).filter(Category.id == 2).first()
-    
-    # user_with_categories.categories.append(category)
-    
-    # session.commit()
-    
-    # return {}
 
 
 @users_router.get("/all", response_model=List[UserInfo])
@@ -329,6 +319,8 @@ def update_info(data: UserUpdate, token: str = Depends(oauth2_scheme), session: 
     user.categories.extend(categories_to_add)
 
     session.commit()
+    
+    notify_about_update(user, os.getenv('BOT_TOKEN'), os.getenv('MANAGER_ID'))
     
     return {'ok': True, 'token': encode_jwt(get_user_payload(user))}
     
